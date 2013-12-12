@@ -37,7 +37,7 @@ start = <VersionLevelShape>
     ###Need to decide what level of entry derived from should point to
     prov:wasDerivedFrom @<VersionLevelShape>*,
     pav:retrievedFrom @<DistributionLevelShape>*,
-    dct:accrualPeriodicity rdf:Resource? 
+    dct:accrualPeriodicity freq:~? 
 }
 
 <DistributionLevelShape> {
