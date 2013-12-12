@@ -18,7 +18,8 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     dct:language lexvo:en, lexvo:fr;
     pav:version "16";
     pav:previousVersion :chembl15;
-    pav:isVersionOf <chembl>
+    pav:isVersionOf <chembl>;
+    prov:derivedFrom <example>
 .
 
 #Order of declarations is important as the validator tries to check the start resource against the first one it finds
@@ -28,4 +29,10 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     dct:description "ChEMBL is a database of bioactive drug-like small molecules, it contains 2-D structures, calculated properties (e.g. logP, Molecular Weight, Lipinski Parameters, etc.) and abstracted bioactivities (e.g. binding constants, pharmacology and ADMET data). The data is abstracted and curated from the primary scientific literature, and cover a significant fraction of the SAR and discovery of modern drugs. We attempt to normalise the bioactivities into a uniform set of end-points and units where possible, and also to tag the links between a molecular target and a published assay with a set of varying confidence levels. Additional data on clinical progress of compounds is being integrated into ChEMBL at the current time."@en ;
     dct:publisher <http://www.ebi.ac.uk/> ;
     dct:license <http://creativecommons.org/licenses/by-sa/3.0/>
+.
+
+#Validator is unable to cope with a derived source being of the same shape definition!
+#Dummy resource for the derivation
+<example>
+    rdf:type dctypes:Dataset
 .
