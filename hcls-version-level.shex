@@ -1,0 +1,23 @@
+#BASE <http://base.example/#>
+
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+PREFIX foaf: <http://foaf.example/#>
+PREFIX lexvo: <http://lexvo.org/id/iso639-3/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+start = <VersionLevelShape>
+
+<VersionLevelShape> {
+    rdf:type (dctypes:Dataset),
+    dct:title xsd:string,  ### should be rdf:langString 
+    dct:description xsd:string, ### should be rdf:langString 
+    # Ensure that at least one of created or issued dates is provided
+    (dct:created xsd:dateTime, dct:issued xsd:dateTime? |
+        dct:created xsd:dateTime?, dct:issued xsd:dateTime),
+    dct:publisher rdf:Resource,
+    (foaf:page rdf:Resource)?,
+    dct:license rdf:Resource,
+    dct:language rdf:Resource*
+}
