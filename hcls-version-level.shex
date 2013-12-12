@@ -4,6 +4,7 @@ PREFIX dct: <http://purl.org/dc/terms/>
 PREFIX dctypes: <http://purl.org/dc/dcmitype/>
 PREFIX foaf: <http://foaf.example/#>
 PREFIX lexvo: <http://lexvo.org/id/iso639-3/>
+PREFIX pav: <http://purl.org/pav/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
@@ -19,5 +20,8 @@ start = <VersionLevelShape>
     dct:publisher rdf:Resource,
     (foaf:page rdf:Resource)?,
     dct:license rdf:Resource,
-    dct:language rdf:Resource*
+    dct:language rdf:Resource*,
+    pav:version xsd:string?,
+    pav:previousVersion rdf:Resource?,
+    pav:isVersionOf rdf:Resource
 }
