@@ -32,7 +32,7 @@ start = <VersionLevelShape>
     dct:license rdf:Resource,
     dct:language lexvo:~*,
     pav:version xsd:string?,
-    pav:previousVersion rdf:Resource?,
+    pav:previousVersion @<VersionLevelShape>?,
     pav:isVersionOf @<EntryLevelShape>,
     ###Need to decide what level of entry derived from should point to
     prov:wasDerivedFrom @<VersionLevelShape>*,

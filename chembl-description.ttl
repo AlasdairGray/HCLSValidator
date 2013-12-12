@@ -18,7 +18,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     dct:license <http://creativecommons.org/licenses/by-sa/3.0/> ;
     dct:language lexvo:en, lexvo:fr;
     pav:version "16";
-    pav:previousVersion :chembl15;
+    pav:previousVersion <chembl15>;
     pav:isVersionOf <chembl>;
     prov:derivedFrom <example>;
     dct:accrualPeriodicity freq:quarterly
@@ -31,6 +31,20 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     dct:description "ChEMBL is a database of bioactive drug-like small molecules, it contains 2-D structures, calculated properties (e.g. logP, Molecular Weight, Lipinski Parameters, etc.) and abstracted bioactivities (e.g. binding constants, pharmacology and ADMET data). The data is abstracted and curated from the primary scientific literature, and cover a significant fraction of the SAR and discovery of modern drugs. We attempt to normalise the bioactivities into a uniform set of end-points and units where possible, and also to tag the links between a molecular target and a published assay with a set of varying confidence levels. Additional data on clinical progress of compounds is being integrated into ChEMBL at the current time."@en ;
     dct:publisher <http://www.ebi.ac.uk/> ;
     dct:license <http://creativecommons.org/licenses/by-sa/3.0/>
+.
+
+<chembl15>
+    rdf:type dctypes:Dataset ;
+    dct:title "ChEMBL"@en ;
+    dct:description "ChEMBL is a database of bioactive drug-like small molecules, it contains 2-D structures, calculated properties (e.g. logP, Molecular Weight, Lipinski Parameters, etc.) and abstracted bioactivities (e.g. binding constants, pharmacology and ADMET data). The data is abstracted and curated from the primary scientific literature, and cover a significant fraction of the SAR and discovery of modern drugs. We attempt to normalise the bioactivities into a uniform set of end-points and units where possible, and also to tag the links between a molecular target and a published assay with a set of varying confidence levels. Additional data on clinical progress of compounds is being integrated into ChEMBL at the current time."@en ;
+    dct:created "2013-05-07T00:00:00"^^xsd:dateTime ;
+    dct:publisher <http://www.ebi.ac.uk/> ;
+    dct:license <http://creativecommons.org/licenses/by-sa/3.0/> ;
+    dct:language lexvo:en, lexvo:fr;
+    pav:version "15";
+    pav:isVersionOf <chembl>;
+    prov:derivedFrom <example>;
+    dct:accrualPeriodicity freq:quarterly
 .
 
 #Validator is unable to cope with a derived source being of the same shape definition!
