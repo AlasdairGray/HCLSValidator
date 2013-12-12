@@ -10,6 +10,15 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 start = <VersionLevelShape>
 
+<EntryLevelShape> {
+    rdf:type (dctypes:Dataset),
+    dct:title xsd:string,  ### should be rdf:langString 
+    dct:description xsd:string, ### should be rdf:langString 
+    dct:publisher rdf:Resource,
+    (foaf:page rdf:Resource)?,
+    dct:license rdf:Resource
+}
+
 <VersionLevelShape> {
     rdf:type (dctypes:Dataset),
     dct:title xsd:string,  ### should be rdf:langString 
@@ -23,5 +32,5 @@ start = <VersionLevelShape>
     dct:language rdf:Resource*,
     pav:version xsd:string?,
     pav:previousVersion rdf:Resource?,
-    pav:isVersionOf rdf:Resource
+    pav:isVersionOf @<EntryLevelShape>
 }
