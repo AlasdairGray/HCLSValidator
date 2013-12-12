@@ -3,6 +3,7 @@
 PREFIX dct: <http://purl.org/dc/terms/>
 PREFIX dctypes: <http://purl.org/dc/dcmitype/>
 PREFIX foaf: <http://foaf.example/#>
+PREFIX freq: <http://purl.org/cld/freq/>
 PREFIX lexvo: <http://lexvo.org/id/iso639-3/>
 PREFIX pav: <http://purl.org/pav/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -19,7 +20,8 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     pav:version "16";
     pav:previousVersion :chembl15;
     pav:isVersionOf <chembl>;
-    prov:derivedFrom <example>
+    prov:derivedFrom <example>;
+    dct:accrualPeriodicity freq:quarterly
 .
 
 #Order of declarations is important as the validator tries to check the start resource against the first one it finds
