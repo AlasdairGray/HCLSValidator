@@ -30,7 +30,7 @@ start = <VersionLevelShape>
     dct:publisher rdf:Resource,
     (foaf:page rdf:Resource)?,
     dct:license rdf:Resource,
-    dct:language rdf:Resource*,
+    dct:language lexvo:~*,
     pav:version xsd:string?,
     pav:previousVersion rdf:Resource?,
     pav:isVersionOf @<EntryLevelShape>,
@@ -50,5 +50,5 @@ start = <VersionLevelShape>
     dct:publisher rdf:Resource,
     (foaf:page rdf:Resource)?,
     dct:license rdf:Resource,
-    dct:language rdf:Resource*
+    dct:language lexvo:~*
 }
