@@ -12,9 +12,7 @@ ShExDemo = function() {
     var VALPARM = 3;
 
 	var SCHEMA_TEXT; 
-	$.get('hcls-validator.shex', function(data) {
-		SCHEMA_TEXT = data;
-	});
+	var SCHEMA_FILE = 'hcls-validator.shex';
 
     var last    = {}; // Save input values to avoid needless re-execution.
 
@@ -192,6 +190,10 @@ ShExDemo = function() {
                     getSequenceOfURLs(iface.queryParms['dataURL'], $("#data .textInput"), joinAndRun);
                 }
             }
+            $.get(SCHEMA_FILE, function(data) {
+				SCHEMA_TEXT = data;
+				iface.setTimer(SCHEMA, function() { iface.parseSchema() && iface.graph && iface.validate(); });
+			});
         },
 
         // Update the location bar with the new content.
