@@ -29,7 +29,7 @@ a, a:visited { color: #3d586c; }
 
 /* Course layout elements */
 #main { display: none; position: absolute; top: 0em; left: 0; right: 0; bottom: 0;}
-h2 { margin: 0; border: none; }
+h2 { margin: 0; border: none; padding-bottom: 10px;}
 .column { float:left; margin-right: 1em; }
 .task    { float:left; }
 .disabled { color: gray; background-color: #fff; }
