@@ -129,71 +129,7 @@
         <script src="TurtleParser.js" type="text/javascript"></script>
         <script src="js/ShExDemo.js" type="text/javascript"></script>
         <script type="text/javascript">
-      var d = false;
-      if (d) $("#schema .textInput").val('\
-# Issue-js-test-date-triple.shex - tests relative dates\n\
-\n\
-#BASE <http://base.example/#>\n\
-PREFIX ex: <http://ex.example/#>\n\
-PREFIX foaf: <http://foaf.example/#>\n\
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n\
-\n\
-start = <IssueShape>\n\
-\n\
-<IssueShape> {\n\
-    ex:state (ex:unassigned ex:assigned),\n\
-    ex:reportedBy @<UserShape>,\n\
-    ex:reportedOn xsd:dateTime\n\
-        %js{ report = _.o; return true; %},\n\
-    (ex:reproducedBy @<EmployeeShape>,\n\
-     ex:reproducedOn xsd:dateTime\n\
-        %js{ return _.o.lex > report.lex; %}\n\
-        %sparql{ ?s ex:reportedOn ?rpt . FILTER (?o > ?rpt) %}\n\
-    ),\n\
-    ex:related @<IssueShape>*\n\
-}\n\
-\n\
-<UserShape> {\n\
-    (foaf:name xsd:string\n\
-     | foaf:givenName xsd:string+,\n\
-       foaf:familyName xsd:string),\n\
-    foaf:mbox rdf:Resource\n\
-}\n\
-\n\
-<EmployeeShape> {\n\
-    foaf:givenName xsd:string+,\n\
-    foaf:familyName xsd:string,\n\
-    foaf:phone rdf:Resource*,\n\
-    foaf:mbox rdf:Resource\n\
-}');
-    if (d) $("#data .textInput").val('\
-#BASE <http://base.example/#>\n\
-PREFIX ex: <http://ex.example/#>\n\
-PREFIX foaf: <http://foaf.example/#>\n\
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\
-\n\
-<Issue1>\n\
-    ex:state        ex:unassigned ;\n\
-    ex:reportedBy   <User2> ;\n\
-    ex:reportedOn   "2013-01-23T10:18:00"^^xsd:dateTime ;\n\
-    ex:reproducedBy <Thompson.J> ;\n\
-    ex:reproducedOn "2013-01-23T11:00:00"^^xsd:dateTime ;\n\
-#    ex:related      <Issue2>, <Issue3> \n\
-.\n\
-\n\
-<User2>\n\
-    foaf:givenName "Bob" ;\n\
-    foaf:familyName "Smith" ;\n\
-    foaf:mbox <mail:bob@example.org>\n\
-.\n\
-\n\
-<Thompson.J>\n\
-    foaf:givenName "Joe", "Joseph" ;\n\
-    foaf:familyName "Thompson" ;\n\
-    foaf:phone <tel:+456> ;\n\
-    foaf:mbox <mail:joe@example.org>\n\
-.');
+      		var d = false;
             var interactionInterface = ShExDemo(RDF);
             window.message = interactionInterface.message;
             RDF.message = function (m) {
