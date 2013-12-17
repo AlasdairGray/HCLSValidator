@@ -55,7 +55,7 @@ h2 { margin: 0; border: none; }
 
 
 /* Schema gets color A, Data color B, and Validation a gradient A to B. */
-.textInput         { clear:both; padding: 2px; margin: 0em; text-indent: 0px; border: 1px; }
+.textInput         { clear:both; padding: 2px; margin: 0em; text-indent: 0px; border: 1px solid; }
 .schema-color      { background-color: #afa; }
 #schema .textInput { border-left: .7em solid #afa; }
 .data-color        { background-color: #9bf; }
