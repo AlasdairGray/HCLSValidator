@@ -649,7 +649,7 @@ ShExDemo = function() {
         },
 
         enablePre: function() {
-            $("#schema, #data").each(function(el) {
+            $("#data").each(function(el) {
                 $(this).find("pre").get(0).innerText = $(this).find("textarea").val();
                 var width = $(this).width();
                 $(this).find("textarea").hide().removeClass("textInput");
@@ -664,7 +664,7 @@ ShExDemo = function() {
         },
 
         enableTextarea: function() {
-            $("#schema, #data").each(function(el) {
+            $("#data").each(function(el) {
                 $(this).find("textarea").val($(this).find("pre").get(0).innerText);
                 $(this).find("pre").hide().removeClass("textInput");
                 $(this).find("textarea").addClass("textInput").show();
@@ -674,7 +674,6 @@ ShExDemo = function() {
         layoutPanels: function() {
             if ($("#ctl-colorize").is(":checked")) // brutal hack
                 iface.enableTextarea();
-            $("#schema .textInput").height(($("#schema .textInput").parent().parent().innerHeight()/2) + "px");
             $("#data .textInput").height(($("#data .textInput").parent().parent().innerHeight()/2) + "px");
             if ($("#ctl-colorize").is(":checked"))
                 iface.enablePre();
