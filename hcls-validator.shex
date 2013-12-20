@@ -43,8 +43,8 @@ start = <EntryLevelShape>
     ###Need to decide what level of entry derived from should point to
     prov:wasDerivedFrom @<VersionLevelShape>*,
     pav:retrievedFrom @<DistributionLevelShape>*,
-    dcat:distribution @<RDFDistributionLevelShape>*
-    ### dcat:distribution @<DistributionLevelShape>* 
+    (dcat:distribution @<RDFDistributionLevelShape>* |
+    dcat:distribution @<DistributionLevelShape>*) 
 }
 
 <DistributionLevelShape> {
@@ -60,10 +60,10 @@ start = <EntryLevelShape>
     (foaf:page rdf:Resource)?,
     dct:license rdf:Resource,
     dct:language lexvo:~*,
-    pav:version xsd:string,
+    pav:version xsd:string?,
     pav:previousVersion @<DistributionLevelShape>?,
-    dct:format (rdf:Resource xsd:string),
-    dcat:downloadURL rdf:Resource
+    (dct:format rdf:Resource? | dct:format xsd:string?),
+    dcat:downloadURL rdf:Resource?
 }
 
 <RDFDistributionLevelShape> {

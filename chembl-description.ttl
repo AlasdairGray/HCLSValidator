@@ -34,7 +34,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     pav:previousVersion <chembl15>;
     pav:isVersionOf <chembl>;
     prov:derivedFrom <example>;
-    dcat:distribution <chembl16rdf>;
+    dcat:distribution <chembl16rdf>, <chembl16db> ;
 .
 
 <chembl16rdf>
@@ -54,6 +54,17 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     void:dataDump <ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBL-RDF/16/chembl_16_molecule.ttl.gz> ;
     void:triples "82003819"^^xsd:integer
 .
+
+<chembl16db>
+	a dctypes:Dataset;
+	dct:title "ChEMBL RDF"@en ;
+	dct:description "The RDF distribution of the ChEMBL 16 dataset."@en ;
+	dct:created "2013-05-07T00:00:00.000+01:00"^^xsd:dateTime ;
+	dct:publisher <http://www.ebi.ac.uk/>;
+    foaf:page <https://www.ebi.ac.uk/chembl> ;
+	dct:license <http://creativecommons.org/licenses/by-sa/3.0/> ;
+.
+
 <chembl15>
     rdf:type dctypes:Dataset ;
     dct:title "ChEMBL"@en ;
