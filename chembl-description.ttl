@@ -6,7 +6,9 @@ PREFIX foaf: <http://foaf.example/#>
 PREFIX freq: <http://purl.org/cld/freq/>
 PREFIX lexvo: <http://lexvo.org/id/iso639-3/>
 PREFIX pav: <http://purl.org/pav/>
+PREFIX prov: <http://www.w3.org/ns/prov#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX void: <http://rdfs.org/ns/void#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 <chembl>
@@ -14,7 +16,9 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     dct:title "ChEMBL"@en ;
     dct:description "ChEMBL is a database of bioactive drug-like small molecules, it contains 2-D structures, calculated properties (e.g. logP, Molecular Weight, Lipinski Parameters, etc.) and abstracted bioactivities (e.g. binding constants, pharmacology and ADMET data). The data is abstracted and curated from the primary scientific literature, and cover a significant fraction of the SAR and discovery of modern drugs. We attempt to normalise the bioactivities into a uniform set of end-points and units where possible, and also to tag the links between a molecular target and a published assay with a set of varying confidence levels. Additional data on clinical progress of compounds is being integrated into ChEMBL at the current time."@en ;
     dct:publisher <http://www.ebi.ac.uk/> ;
-    dct:license <http://creativecommons.org/licenses/by-sa/3.0/>
+    foaf:page <https://www.ebi.ac.uk/chembl> ;
+    dct:license <http://creativecommons.org/licenses/by-sa/3.0/>;
+    dct:accrualPeriodicity freq:quarterly
 .
 
 <chembl16>
@@ -22,16 +26,34 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     dct:title "ChEMBL"@en ;
     dct:description "ChEMBL is a database of bioactive drug-like small molecules, it contains 2-D structures, calculated properties (e.g. logP, Molecular Weight, Lipinski Parameters, etc.) and abstracted bioactivities (e.g. binding constants, pharmacology and ADMET data). The data is abstracted and curated from the primary scientific literature, and cover a significant fraction of the SAR and discovery of modern drugs. We attempt to normalise the bioactivities into a uniform set of end-points and units where possible, and also to tag the links between a molecular target and a published assay with a set of varying confidence levels. Additional data on clinical progress of compounds is being integrated into ChEMBL at the current time."@en ;
     dct:created "2013-08-29T00:00:00"^^xsd:dateTime ;
+    foaf:page <https://www.ebi.ac.uk/chembl> ;
     dct:publisher <http://www.ebi.ac.uk/> ;
     dct:license <http://creativecommons.org/licenses/by-sa/3.0/> ;
-    dct:language lexvo:en, lexvo:fr;
+    dct:language lexvo:en;
     pav:version "16";
     pav:previousVersion <chembl15>;
     pav:isVersionOf <chembl>;
     prov:derivedFrom <example>;
-    dct:accrualPeriodicity freq:quarterly
+    dcat:distribution <chembl16rdf>;
 .
 
+<chembl16rdf>
+	a void:Dataset ;
+	dct:title "ChEMBL RDF"@en ;
+	dct:description "The RDF distribution of the ChEMBL 16 dataset."@en ;
+	dct:created "2013-05-07T00:00:00.000+01:00"^^xsd:dateTime ;
+	dct:creator <http://orcid.org/0000-0002-8011-0300> ;
+	dct:publisher <http://www.ebi.ac.uk/>;
+    foaf:page <https://www.ebi.ac.uk/chembl> ;
+	dct:license <http://creativecommons.org/licenses/by-sa/3.0/> ;
+	pav:version "16.0";
+	void:vocabulary <http://purl.org/ontology/bibo/> , <http://www.bioassayontology.org/bao#> , <http://purl.org/obo/owl/CHEBI#> , <http://rdf.ebi.ac.uk/resource/chembl/> , <http://semanticscience.org/resource/> , <http://purl.org/spar/cito/> , <http://purl.org/dc/terms/> , <http://www.w3.org/2002/07/owl#> , <http://purl.obolibrary.org/obo/> , <http://www.w3.org/1999/02/22-rdf-syntax-ns#> , <http://www.w3.org/2000/01/rdf-schema#> , <http://www.w3.org/2004/02/skos/core#> , <http://www.w3.org/2001/XMLSchema#> ;
+    void:exampleResource <http://rdf.ebi.ac.uk/resource/chembl/molecule/CHEMBL941/> ;
+    void:sparqlEndpoint <http://rdf.ebi.ac.uk/dataset/chembl/sparql> ;
+    dct:format "text/turtle";
+    void:dataDump <ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBL-RDF/16/chembl_16_molecule.ttl.gz> ;
+    void:triples "82003819"^^xsd:integer
+.
 <chembl15>
     rdf:type dctypes:Dataset ;
     dct:title "ChEMBL"@en ;
@@ -42,12 +64,5 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     dct:language lexvo:en, lexvo:fr;
     pav:version "15";
     pav:isVersionOf <chembl>;
-    prov:derivedFrom <example>;
-    dct:accrualPeriodicity freq:quarterly
-.
-
-#Validator is unable to cope with a derived source being of the same shape definition!
-#Dummy resource for the derivation
-<example>
-    rdf:type dctypes:Dataset
+    prov:derivedFrom <example>
 .

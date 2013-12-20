@@ -8,6 +8,7 @@ PREFIX lexvo: <http://lexvo.org/id/iso639-3/>
 PREFIX pav: <http://purl.org/pav/>
 PREFIX prov: <http://www.w3.org/ns/prov#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX void: <http://rdfs.org/ns/void#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 start = <EntryLevelShape>
@@ -18,7 +19,8 @@ start = <EntryLevelShape>
     dct:description xsd:string, ### should be rdf:langString 
     dct:publisher rdf:Resource,
     (foaf:page rdf:Resource)?,
-    dct:license rdf:Resource
+    dct:license rdf:Resource,
+    dct:accrualPeriodicity freq:~?
 }
 
 <VersionLevelShape> {
@@ -28,6 +30,9 @@ start = <EntryLevelShape>
     # Ensure that at least one of created or issued dates is provided
     (dct:created xsd:dateTime, dct:issued xsd:dateTime? |
         dct:created xsd:dateTime?, dct:issued xsd:dateTime),
+    #This form does not work! dct:creator (rdf:Resource xsd:string)?,
+    (dct:creator rdf:Resource* |
+    	dct:creator xsd:string*),
     dct:publisher rdf:Resource,
     (foaf:page rdf:Resource)?,
     dct:license rdf:Resource,
@@ -38,8 +43,8 @@ start = <EntryLevelShape>
     ###Need to decide what level of entry derived from should point to
     prov:wasDerivedFrom @<VersionLevelShape>*,
     pav:retrievedFrom @<DistributionLevelShape>*,
-    dct:accrualPeriodicity freq:~?,
-    dcat:distribution @<DistributionLevelShape>* 
+    dcat:distribution @<RDFDistributionLevelShape>*
+    ### dcat:distribution @<DistributionLevelShape>* 
 }
 
 <DistributionLevelShape> {
@@ -49,8 +54,52 @@ start = <EntryLevelShape>
     # Ensure that at least one of created or issued dates is provided
     (dct:created xsd:dateTime, dct:issued xsd:dateTime? |
         dct:created xsd:dateTime?, dct:issued xsd:dateTime),
+    (dct:creator rdf:Resource* |
+    	dct:creator xsd:string*),
     dct:publisher rdf:Resource,
     (foaf:page rdf:Resource)?,
     dct:license rdf:Resource,
-    dct:language lexvo:~*
+    dct:language lexvo:~*,
+    pav:version xsd:string,
+    pav:previousVersion @<DistributionLevelShape>?,
+    dct:format (rdf:Resource xsd:string),
+    dcat:downloadURL rdf:Resource
+}
+
+<RDFDistributionLevelShape> {
+    rdf:type (void:Dataset),
+    dct:title xsd:string,  ### should be rdf:langString 
+    dct:description xsd:string, ### should be rdf:langString 
+    # Ensure that at least one of created or issued dates is provided
+    (dct:created xsd:dateTime, dct:issued xsd:dateTime? |
+        dct:created xsd:dateTime?, dct:issued xsd:dateTime),
+    (dct:creator rdf:Resource* |
+    	dct:creator xsd:string*),
+    dct:publisher rdf:Resource,
+    (foaf:page rdf:Resource)?,
+    dct:license rdf:Resource,
+    dct:language lexvo:~*,
+    void:vocabulary rdf:Resource*,
+    pav:version xsd:string,
+    pav:previousVersion @<RDFDistributionLevelShape>?,
+    dct:format ("text/turtle" "application/rdf+xml" "text/plain" "text/rdf+n3"),
+    void:dataDump rdf:Resource*,
+    void:triples xsd:integer?,
+    void:entities xsd:integer?,
+    void:distinctSubjects xsd:integer?,
+    void:properties xsd:integer?,
+    void:distinctObjects xsd:integer?,
+    sd:namedGraph rdf:Resource?,
+    void:propertyPartition @<PropertyPartitionShape>*,
+    void:classPartition @<ClassPartitionShape>*
+}
+
+<PropertyPartitionShape> {
+	void:property rdf:Resource,
+	void:triples xsd:integer
+}
+
+<ClassPartitionShape> {
+	void:class rdf:Resource,
+	void:entities xsd:integer
 }
