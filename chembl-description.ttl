@@ -1,5 +1,6 @@
 #BASE <http://rdf.ebi.ac.uk/chembl/>
 
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
 PREFIX dct: <http://purl.org/dc/terms/>
 PREFIX dctypes: <http://purl.org/dc/dcmitype/>
 PREFIX foaf: <http://foaf.example/#>

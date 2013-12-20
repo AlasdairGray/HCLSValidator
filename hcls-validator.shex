@@ -1,5 +1,6 @@
 #BASE <http://base.example/#>
 
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
 PREFIX dct: <http://purl.org/dc/terms/>
 PREFIX dctypes: <http://purl.org/dc/dcmitype/>
 PREFIX foaf: <http://foaf.example/#>
@@ -43,8 +44,7 @@ start = <EntryLevelShape>
     ###Need to decide what level of entry derived from should point to
     prov:wasDerivedFrom @<VersionLevelShape>*,
     pav:retrievedFrom @<DistributionLevelShape>*,
-    (dcat:distribution @<RDFDistributionLevelShape>* |
-    dcat:distribution @<DistributionLevelShape>*) 
+    (dcat:distribution @<RDFDistributionLevelShape>* | dcat:distribution @<DistributionLevelShape>*)
 }
 
 <DistributionLevelShape> {
