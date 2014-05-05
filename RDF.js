@@ -149,11 +149,16 @@ function ResourceShapeCardinality (min, max, sePrefix, rsPrefix, seFix, rsFix) {
         }).join("");
     }
 
-RDF = {
-    config: {
-        UniqueShapePredicates: false
-    },
+    function codesToHaskell (codes, depth) {
+        var lead = pad(depth, '    ');
+        if (codes === undefined)
+            return "";
+        return Object.keys(codes).map(function (k) {
+            return "\n" + lead + codes[k].toHaskell(depth+1);
+        }).join("");
+    }
 
+RDF = {
     message: function (str) {
         console.error(str);
     },
@@ -170,6 +175,92 @@ RDF = {
         }
     },
 
+    createIRIResolver: function() {
+        return {
+            errorHandler: function (message) { throw message; },
+
+            // make a copy, usually to have a new prefix map. e.g.
+            //   var prefixes = r.schemaIRIResolver.clone().Prefixes;
+            //   prefixes['se'] = "http://www.w3.org/2013/ShEx/Definition#";
+            clone: function () {
+                var ret = { Prefixes:{} };
+                for (var p in this)
+                    if (p != 'Prefixes')
+                        ret[p]=this[p];
+                for (var p in this.Prefixes)
+                    ret.Prefixes[p]=this.Prefixes[p];
+                return ret;
+            },
+
+            Base: '',
+            setBase: function (base) {
+                this.Base = base;
+            },
+            getBase: function (base) {
+                return this.Base;
+            },
+
+            Prefixes: {},
+            setPrefix: function (pre, i) {
+                this.Prefixes[pre] = i;
+            },
+            getPrefix: function (pre) {
+                // unescapeReserved
+                var nspace = this.Prefixes[pre];
+                if (nspace == undefined) {
+                    this.errorHandler("unknown namespace prefix: " + pre);
+                    // throw("unknown namespace prefix: " + pre);
+                    RDF.message("unknown namespace prefix: " + pre);
+                    nspace = '<!' + pre + '!>'
+                }
+                return nspace;
+            },
+
+            getAbsoluteIRI: function (rel) {
+                var relProtHostPath  = /^(?:([a-z]+:)?(\/\/[^\/]+))?(.*?)$/.exec(rel);
+                var baseProtHostPath = /^(?:([a-z]+:)?(\/\/[^\/]+))?(.*?)[^\/]*$/.exec(this.getBase());
+                var prot = relProtHostPath[1] || baseProtHostPath[1] || "";
+                var host = relProtHostPath[2] || baseProtHostPath[2] || "";
+                var path = relProtHostPath[3].charAt() === '/' ? relProtHostPath[3] : baseProtHostPath[3] + relProtHostPath[3];
+                path = path.replace(/\/(\.\/)*/g, '/');
+                path = path.replace(/\/\/+/g, '/');
+                var startAt = path.match(/^(\/\.\.)*/g)[0].length;
+                var prepend = path.substr(0,startAt);
+                path = path.substr(startAt);
+                while (path.match(/\/\.\./)) {
+                    path
+                        = path.match(/\/\.\.$/)
+                        ? path.replace(/\/([^\/]*?)\/\.\.$/, '')
+                        : path.replace(/\/([^\/]*?)\/\.\.\//, '/');
+                    var startAt = path.match(/^(\/\.\.)*/g)[0].length;
+                    prepend += path.substr(0,startAt);
+                    path = path.substr(startAt);
+                }
+                if ((prot || host) && !path)
+                    path = "/";
+                return prot + host + prepend + path;
+            },
+            oldAttemptsAt_getAbsoluteIRI: function (url) {
+                if (url.indexOf('//') > 0 || this.getBase() == undefined)
+                    return url;
+                return this.getBase().substr(0, this.getBase().lastIndexOf('/') + 1) + url;
+                var doc      = document,
+                old_base = doc.getElementsByTagName('base')[0],
+                old_href = old_base && old_base.href,
+                doc_head = doc.head || doc.getElementsByTagName('head')[0],
+                our_base = old_base || doc_head.appendChild(doc.createElement('base')),
+                resolver = doc.createElement('a'),
+                resolved_url;
+                our_base.href = this.getBase();
+                resolver.href = url;
+                resolved_url  = resolver.href; // browser magic at work here
+                if (old_base) old_base.href = old_href;
+                else doc_head.removeChild(our_base);
+                return resolved_url;
+            }
+        };
+    },
+
     DISPOSITION: {
         PASS :      {value: 1, name: "pass"      }, 
         FAIL:       {value: 3, name: "fail"      }, 
@@ -184,46 +275,6 @@ RDF = {
         for (var i in keys)
             ret += "PREFIX " + keys[i] + ":<" + prefixes[keys[i]] + ">\n";
         return ret;
-    },
-
-    // Util
-    Base: '',
-    setBase: function (base) {
-        this.Base = base;
-    },
-
-    getAbsoluteIRI: function (url) {
-        if (url.indexOf('//') > 0 || this.Base == undefined)
-            return url;
-        return this.Base.substr(0, this.Base.lastIndexOf('/')) + url;
-        var doc      = document,
-        old_base = doc.getElementsByTagName('base')[0],
-        old_href = old_base && old_base.href,
-        doc_head = doc.head || doc.getElementsByTagName('head')[0],
-        our_base = old_base || doc_head.appendChild(doc.createElement('base')),
-        resolver = doc.createElement('a'),
-        resolved_url;
-        our_base.href = Base;
-        resolver.href = url;
-        resolved_url  = resolver.href; // browser magic at work here
-        if (old_base) old_base.href = old_href;
-        else doc_head.removeChild(our_base);
-        return resolved_url;
-    },
-
-    Prefixes: {},
-    addPrefix: function (pre, i) {
-        this.Prefixes[pre] = i;
-    },
-
-    getPrefix: function (pre) {
-        // unescapeReserved
-        var nspace = this.Prefixes[pre];
-        if (nspace == undefined) {
-            this.message("unknown namespace prefix: " + pre);
-            nspace = '<!' + pre + '!>'
-        }
-        return nspace;
     },
 
     decodeUCHAR: function (el) {
@@ -263,7 +314,7 @@ RDF = {
         this.toString = function () {
             var ret = '"' + this.lex + '"';
             if (this.langtag != undefined)
-                ret += '@' + this.langtag;
+                ret += '@' + this.langtag.toString();
             if (this.datatype != undefined)
                 ret += '^^' + this.datatype.toString();
             return ret;
@@ -271,15 +322,36 @@ RDF = {
         this.assignId = function (charmap, id) {
             if (this.id === undefined) {
                 this.id = id;
+
+                // Adding the markup for the lexical form before the datatype or
+                // langtag takes advantage of the insert order and renders an
+                // irrelevent datatype tag for native types (integer, decimal,
+                // real).
+                charmap.insertBefore(this.offset, "<span id='"+id+"' class='literal'>", 0);
+                charmap.insertAfter(this.offset+this.width-2, "</span>", 0); // !! needed to prevent two extra chars getting colored, but why?!
+                // if (this.langtag != undefined)
+                //     this.langtag.assignId(charmap, id);
                 if (this.datatype != undefined)
                     this.datatype.assignId(charmap, id);
-//            if (this.langtag != undefined)
-//                ret += '@' + this.langtag;
-                charmap.insertBefore(this.offset, "<span id='"+id+"' class='literal'>", 0);
-                charmap.insertAfter(this.offset+this.width, "</span>", 0);
+                if (this.langtag != undefined)
+                    this.langtag.assignId(charmap, id);
             }
             return this.id;
         };
+    },
+    LangTag: function (line, column, offset, width, lex) {
+        this._ = 'LangTag'; this.line = line; this.column = column; this.offset = offset; this.width = width; this.lex = lex; this.id = undefined;
+        this.toString = function () {
+            return this.lex;
+        },
+        this.assignId = function (charmap, id) {
+            if (this.id === undefined) {
+                this.id = id;
+                charmap.insertBefore(this.offset, "<span id='"+id+"' class='langtag'>", 0);
+                charmap.insertAfter(this.offset+this.width, "</span>", 0);
+            }
+            return this.id;
+        }
     },
     BNode: function (line, column, offset, width, lex) {
         this._ = 'BNode'; this.line = line; this.column = column; this.offset = offset; this.width = width; this.lex = lex; this.id = undefined;
@@ -297,7 +369,7 @@ RDF = {
     },
     NextBNode: 0,
     nextBNode: function (line, column, offset, width) {
-        return new RDF.BNode(line, column, offset, width, ''+this.NextBNode++);
+        return new RDF.BNode(line, column, offset, width, ''+this.NextBNode++); // needs mutex
     },
 
     Triple: function (s, p, o) {
@@ -326,7 +398,18 @@ RDF = {
                     ret.push(t);
             }
             return ret;
-        };
+        },
+        this.triplesMatching_str = function (s, p, o) {
+            var ret = [];
+            for (var i = 0; i < this.triples.length; ++i) {
+                var t = this.triples[i];
+                if (   (s === undefined || s === t.s.toString())
+                    && (p === undefined || p === t.p.toString())
+                    && (o === undefined || o === t.o.toString()))
+                    ret.push(t);
+            }
+            return ret;
+        },
         this.length = function () {
             return this.triples.length;
         },
@@ -373,6 +456,9 @@ RDF = {
         this.toSExpression = function (depth) {
             return "(code \""+this.label+"\" \""+this.code+"\")";
         }
+        this.toHaskell = function (depth) {
+            return "(code \""+this.label+"\" \""+this.code+"\")";
+        }
     },
 
     Comment: function (line, column, offset, width, comment) {
@@ -408,9 +494,12 @@ RDF = {
         this.toSExpression = function (depth) {
             return "(NameTerm "+this.term.toString()+")";
         }
+        this.toHaskell = function (depth) {
+            return "(NameTerm "+this.term.toString()+")";
+        }
     },
-    NameAny: function (line, column, exclusions) {
-        this._ = 'NameAny'; this.line = line; this.column = column; this.exclusions = exclusions;
+    NameWild: function (line, column, exclusions) {
+        this._ = 'NameWild'; this.line = line; this.column = column; this.exclusions = exclusions;
         this.toString = function () {
             var ret = '.';
             ret += this.exclusions.map(function (ex) { return ' - ' + ex.toString(); }).join('');
@@ -424,11 +513,14 @@ RDF = {
         }
         this.toResourceShapes = function (db, prefixes, sePrefix, rsPrefix, depth) {
             if (exclusions.length)
-                throw "expressing NameAny with exclusions " + this.toString() + " will require some fancy POWDER.";
+                throw "expressing NameWild with exclusions " + this.toString() + " will require some fancy POWDER.";
             return '';
         }
         this.toSExpression = function (depth) {
-            return "(NameAny "+(this.exclusions.map(function(ex){return ex.toString();}).join(' '))+")";
+            return "(NameWild "+(this.exclusions.map(function(ex){return ex.toString();}).join(' '))+")";
+        }
+        this.toHaskell = function (depth) {
+            return "(NameWild "+(this.exclusions.map(function(ex){return ex.toString();}).join(' '))+")";
         }
     },
     NamePattern: function (line, column, term) {
@@ -451,6 +543,9 @@ RDF = {
                 + seFix + "propertyStem " + this.SPARQLpredicate(prefixes) + " ;\n";
         }
         this.toSExpression = function (depth) {
+            return "(NamePattern "+this.term.toString()+")";
+        }
+        this.toHaskell = function (depth) {
             return "(NamePattern "+this.term.toString()+")";
         }
     },
@@ -516,6 +611,7 @@ RDF = {
         return new RDF.QueryClause(counter, str);
     },
 
+    // @<foo>
     ValueReference: function (line, column, offset, width, label) {
         this._ = 'ValueReference'; this.line = line; this.column = column; this.offset = offset; this.width = width; this.label = label;
         this.toString = function () {
@@ -523,7 +619,9 @@ RDF = {
         },
         this.validate = function (schema, rule, t, db) {
             var ret = new RDF.ValRes();
-            var r = schema.validate(t.o, this.label, db);
+            schema.dispatch('enter', rule.codes, rule, t);
+            var r = schema.validatePoint(t.o, this.label, db, true);
+            schema.dispatch('exit', rule.codes, rule, r);
             ret.status = r.status;
             if (r.passed())
                 { ret.status = r.status; ret.matchedTree(rule, t, r); }
@@ -602,25 +700,38 @@ RDF = {
         this.toSExpression = function (depth) {
             return "(ValueRef "+this.label.toString()+")";
         }
+        this.toHaskell = function (depth) {
+            return "(ValueRef "+this.label.toString()+")";
+        }
     },
+
+    // IRI | LITERAL | xsd:integer
     ValueType: function (line, column, offset, width, type) {
         this._ = 'ValueType'; this.line = line; this.column = column; this.offset = offset; this.width = width; this.type = type;
         this.toString = function () {
             return this.type.toString();
         },
         this.validate = function (schema, rule, t, db) {
+            function passIf (b) {
+                if (b) { ret.status = RDF.DISPOSITION.PASS; ret.matched(rule, t); }
+                else { ret.status = RDF.DISPOSITION.FAIL; ret.error_noMatch(rule, t); }
+            };
             var ret = new RDF.ValRes();
-            if (this.type.toString() == "<http://www.w3.org/2001/XMLSchema#string>")
-                if (t.o._ == "RDFLiteral")    { ret.status = RDF.DISPOSITION.PASS; ret.matched(rule, t); }
-                else                          { ret.status = RDF.DISPOSITION.FAIL; ret.error_noMatch(rule, t); }
-            else if (this.type.toString() == "<http://www.w3.org/1999/02/22-rdf-syntax-ns#Resource>")
-                if (t.o._ == "IRI")           { ret.status = RDF.DISPOSITION.PASS; ret.matched(rule, t); }
-                else                          { ret.status = RDF.DISPOSITION.FAIL; ret.error_noMatch(rule, t); }
-            else if (t.o._ == "RDFLiteral" && t.o.datatype != undefined
-                     && t.o.datatype.toString() == this.type.toString())
-                { ret.status = RDF.DISPOSITION.PASS; ret.matched(rule, t); }
-            else
-            { ret.status = RDF.DISPOSITION.FAIL; ret.error_noMatch(rule, t); }
+            if      (this.type.toString() == "<http://www.w3.org/2013/ShEx/ns#Literal>")
+                passIf(t.o._ == "RDFLiteral");
+            else if (this.type.toString() == "<http://www.w3.org/2013/ShEx/ns#IRI>")
+                passIf(t.o._ == "IRI");
+            else if (this.type.toString() == "<http://www.w3.org/2013/ShEx/ns#BNode>")
+                passIf(t.o._ == "BNode");
+            else if (this.type.toString() == "<http://www.w3.org/2013/ShEx/ns#NonLiteral>")
+                passIf(t.o._ == "BNode" || t.o._ == "IRI");
+            else if (t.o._ == "RDFLiteral") {
+                if (t.o.datatype == undefined) {
+                    passIf(this.type.toString() == "<http://www.w3.org/2001/XMLSchema#string>");
+                } else {
+                    passIf(t.o.datatype.toString() == this.type.toString());
+                }
+            } else { ret.status = RDF.DISPOSITION.FAIL; ret.error_noMatch(rule, t); }
             return ret;
         },
         this.SPARQLobject = function (prefixes) {
@@ -628,9 +739,11 @@ RDF = {
         },
         this.SPARQLobjectTest = function (prefixes) {
             var s = this.type.toString();
-            if (s == "<http://www.w3.org/2001/XMLSchema#string>") return "isLiteral(?o)";
-            if (s == "<http://www.w3.org/1999/02/22-rdf-syntax-ns#Resource>") return "(isIRI(?o) || isBlank(?o))";
-            return "datatype(?o) = " + defix(this.type, prefixes);
+            if (s == "<http://www.w3.org/2013/ShEx/ns#Literal>") return "isLiteral(?o)";
+            if (s == "<http://www.w3.org/2013/ShEx/ns#NonLiteral>") return "(isIRI(?o) || isBlank(?o))";
+            if (s == "<http://www.w3.org/2013/ShEx/ns#IRI>") return "isIRI(?o)";
+            if (s == "<http://www.w3.org/2013/ShEx/ns#BNode>") return "isBlank(?o)";
+            return "(isLiteral(?o) && datatype(?o) = " + defix(this.type, prefixes) + ")";
         }
         this.SPARQLobjectJoin = function (schema, label, prefixes, depth, counters, inOpt, predicate, predicateTest, card, code) {
             return RDF.arcTest(schema, label, prefixes, depth, counters, inOpt, predicate, predicateTest, this.SPARQLobject(prefixes), this.SPARQLobjectTest(prefixes), card, code);
@@ -647,7 +760,12 @@ RDF = {
         this.toSExpression = function (depth) {
             return "(ValueType "+this.type.toString()+")";
         }
+        this.toHaskell = function (depth) {
+            return "(ValueType "+this.type.toString()+")";
+        }
     },
+
+    // (1 2 3)
     ValueSet: function (line, column, offset, width, values) {
         this._ = 'ValueSet'; this.line = line; this.column = column; this.offset = offset; this.width = width; this.values = values;
         this.toString = function () {
@@ -690,9 +808,14 @@ RDF = {
         this.toSExpression = function (depth) {
             return "(ValueSet "+(this.values.map(function(ex){return ex.toString();}).join(' '))+")";
         }
+        this.toHaskell = function (depth) {
+            return "(ValueSet "+(this.values.map(function(ex){return ex.toString();}).join(' '))+")";
+        }
     },
-    ValueAny: function (line, column, offset, width, exclusions) {
-        this._ = 'ValueAny'; this.line = line; this.column = column; this.offset = offset; this.width = width; this.exclusions = exclusions;
+
+    // . - <foo> - <bar>~
+    ValueWild: function (line, column, offset, width, exclusions) {
+        this._ = 'ValueWild'; this.line = line; this.column = column; this.offset = offset; this.width = width; this.exclusions = exclusions;
         this.toString = function () {
             var x = exclusions.map(function (t) { return t.toString(); });
             x.unshift('.');
@@ -727,12 +850,17 @@ RDF = {
             return RDF.arcSelect(schema, as, prefixes, depth, counters, predicate, predicateTest, this.SPARQLobject(prefixes), this.SPARQLobjectTest(prefixes));
         }
         this.toResourceShapes = function (db, prefixes, sePrefix, rsPrefix, depth) {
-            return "# haven't made up some schema for ValueAny yet.\n";
+            return "# haven't made up some schema for ValueWild yet.\n";
         }
         this.toSExpression = function (depth) {
-            return "(ValueAny "+(this.exclusions.map(function(ex){return ex.toString();}).join(' '))+")";
+            return "(ValueWild "+(this.exclusions.map(function(ex){return ex.toString();}).join(' '))+")";
+        }
+        this.toHaskell = function (depth) {
+            return "(ValueWild "+(this.exclusions.map(function(ex){return ex.toString();}).join(' '))+")";
         }
     },
+
+    // <foo>~
     ValuePattern: function (line, column, offset, width, term) {
         this._ = 'ValuePattern'; this.line = line; this.column = column; this.offset = offset; this.width = width; this.term = term;
         this.toString = function () {
@@ -766,6 +894,9 @@ RDF = {
             return "# haven't made up some schema for ValuePattern yet (POWDER?).\n";
         }
         this.toSExpression = function (depth) {
+            return "(ValuePattern "+this.term.toString()+")";
+        }
+        this.toHaskell = function (depth) {
             return "(ValuePattern "+this.term.toString()+")";
         }
     },
@@ -812,7 +943,7 @@ RDF = {
         // only returns ∅|𝜃 if inOpt
         // ArcRule: if (inOpt ∧ SIZE(matchName)=0) if (min=0) return 𝜃 else return ∅;
         // if(SIZE(matchName)<min|>max) return 𝕗;
-        // vs=matchName.map(valueClass(v,_,g,false)); if(∃𝕗) return 𝕗; return dispatch(𝕡);
+        // vs=matchName.map(valueClass(v,_,g,false)); if(∃𝕗) return 𝕗; return dispatch('post', 𝕡);
         this.validate = function (schema, point, inOpt, db) {
             var matched = 0;
             var ret = new RDF.ValRes();
@@ -829,16 +960,18 @@ RDF = {
             else if (matchName.length < this.min)
                 { ret.status = RDF.DISPOSITION.FAIL; ret.error_belowMin(this.min, this); }
             else if (matchName.length > this.max)
-                { ret.status = RDF.DISPOSITION.FAIL; ret.error_aboveMax(this.max, this.max, matchName[this.max]); }
+                { ret.status = RDF.DISPOSITION.FAIL; ret.error_aboveMax(this.max, this, matchName[this.max]); }
             else {
                 for (var i = 0; i < matchName.length; ++i) {
                     var t = matchName[i];
                     var r = this.valueClass.validate(schema, this, t, db);
+                    if (this.valueClass._ != 'ValueReference')
+                        schema.dispatch('visit', this.codes, r, t);
                     if (!r.passed()) {
                         ret.status = RDF.DISPOSITION.FAIL;
                         ret.add(r);
                     } else {
-                        if (schema.dispatch(this.codes, r, t) == RDF.DISPOSITION.FAIL)
+                        if (schema.dispatch('post', this.codes, r, t) == RDF.DISPOSITION.FAIL)
                             ret.status = RDF.DISPOSITION.FAIL;
                         ret.add(r);
                     }
@@ -890,7 +1023,7 @@ RDF = {
             })
             return ret;
         };
-        this.toResourceShapes_inline = function (db, prefixes, sePrefix, rsPrefix, depth) {
+        this.toResourceShapes_inline = function (schema, db, prefixes, sePrefix, rsPrefix, depth) {
             if (this.ruleID
                 && (this.ruleID._ !== 'BNode'
                     || db.triplesMatching(undefined, undefined, this.ruleID).length !== 0))
@@ -904,7 +1037,7 @@ RDF = {
                 ret += lead + "]";
             return ret;
         };
-        this.toResourceShapes_standalone = function (db, prefixes, sePrefix, rsPrefix, depth) {
+        this.toResourceShapes_standalone = function (schema, db, prefixes, sePrefix, rsPrefix, depth) {
             if (!this.ruleID
                 || (this.ruleID._ === 'BNode'
                     && db.triplesMatching(undefined, undefined, this.ruleID).length === 0))
@@ -925,6 +1058,13 @@ RDF = {
                 + this.valueClass.toSExpression(depth+1)
                 + codesToSExpression(this.codes, depth+1) + ")\n";
         };
+        this.toHaskell = function (depth) {
+            var lead = pad(depth, '    ');
+            return lead + "(Arcrule " + this.min + " " + this.max +" "
+                + this.nameClass.toHaskell(depth+1) +" "
+                + this.valueClass.toHaskell(depth+1)
+                + codesToHaskell(this.codes, depth+1) + ")\n";
+        };
     },
 
     UnaryRule: function (line, column, rule, opt, codes) {
@@ -932,7 +1072,7 @@ RDF = {
         this.ruleID = undefined;
         this.setRuleID = function (ruleID) { this.ruleID = ruleID; }
         this.label = undefined;
-        this.setLabel = function (label) { this.label = label; rule.setLabel(label); }
+        this.setLabel = function (label) { this.label = label; this.rule.setLabel(label); }
         this.toKey = function () { return this.label.toString() + ' ' + this.toString(); }
         this.toString = function () {
             var ret = "(" + rule.toString() + ")";
@@ -959,9 +1099,11 @@ RDF = {
             //     })
         };
         // GroupRule: v=validity(r,p,g,inOpt|opt); if(𝕗|𝜃) return v;
-        // if(∅) {if(inOpt) return ∅ else if (opt) return 𝕡 else return 𝕗}; return dispatch();
+        // if(∅) {if(inOpt) return ∅ else if (opt) return 𝕡 else return 𝕗}; return dispatch('post', );
         this.validate = function (schema, point, inOpt, db) {
+            schema.dispatch('enter', this.codes, this, {o:point}); // !! lie! it's the *subject*!
             var v = this.rule.validate(schema, point, inOpt || this.opt, db);
+            schema.dispatch('exit', this.codes, this, null);
             if (v.status == RDF.DISPOSITION.FAIL || v.status == RDF.DISPOSITION.INDEFINITE)
                 ; // v.status = RDF.DISPOSITION.FAIL; -- avoid dispatch below
             else if (v.status == RDF.DISPOSITION.EMPTY) {
@@ -971,7 +1113,7 @@ RDF = {
                 else
                     v.status = RDF.DISPOSITION.FAIL;
             } else if (v.status != RDF.DISPOSITION.FAIL)
-                v.status = schema.dispatch(this.codes, v, v.matches);
+                v.status = schema.dispatch('post', this.codes, v, v.matches);
             return v;
         };
         this.SPARQLvalidation = function (schema, label, prefixes, depth, counters, inOpt) {
@@ -991,7 +1133,7 @@ RDF = {
         this.SPARQLremainingTriples = function (schema, label, as, prefixes, depth, counters) {
             return this.rule.SPARQLremainingTriples(schema, label, as, prefixes, depth, counters);
         }
-        this.toResourceShapes_inline = function (db, prefixes, sePrefix, rsPrefix, depth) {
+        this.toResourceShapes_inline = function (schema, db, prefixes, sePrefix, rsPrefix, depth) {
             if (this.ruleID)
                 return sePrefix + ":ruleGroup " + this.ruleID.toString();
             var lead = pad(depth, '    ');
@@ -1000,11 +1142,11 @@ RDF = {
             var ret = '';
             ret += sePrefix + ":ruleGroup " + "[\n";
             ret += lead + ResourceShapeCardinality(this.opt === undefined ? 1 : 0, 1, sePrefix, rsPrefix, seFix, rsFix);
-            ret += lead + "    " + this.rule.toResourceShapes_inline(db, prefixes, sePrefix, rsPrefix, depth+1);
+            ret += lead + "    " + this.rule.toResourceShapes_inline(schema, db, prefixes, sePrefix, rsPrefix, depth+1);
             ret += lead + "]";
             return ret;
         };
-        this.toResourceShapes_standalone = function (db, prefixes, sePrefix, rsPrefix, depth) {
+        this.toResourceShapes_standalone = function (schema, db, prefixes, sePrefix, rsPrefix, depth) {
             if (!this.ruleID)
                 return '';
             var lead = pad(depth, '    ');
@@ -1013,7 +1155,7 @@ RDF = {
             var ret = '';
             ret += this.ruleID.toString() + "\n";
             ret += lead + ResourceShapeCardinality(this.opt === undefined ? 1 : 0, 1, sePrefix, rsPrefix, seFix, rsFix);
-            ret += this.rule.toResourceShapes_standalone(db, prefixes, sePrefix, rsPrefix, depth);
+            ret += this.rule.toResourceShapes_standalone(schema, db, prefixes, sePrefix, rsPrefix, depth);
             ret += ".\n";
             return ret;
         };
@@ -1023,6 +1165,98 @@ RDF = {
             return lead + "(GroupRule " + (this.opt?":optional":"") +"\n"
                 + this.rule.toSExpression(depth+1)
                 + codesToSExpression(this.codes, depth+1) + lead + ")\n";
+        };
+        this.toHaskell = function (depth) {
+            var lead = pad(depth, '    ');
+            return lead + "(GroupRule " + (this.opt?":optional":"") +"\n"
+                + this.rule.toHaskell(depth+1)
+                + codesToHaskell(this.codes, depth+1) + lead + ")\n";
+        };
+    },
+
+    IncludeRule: function (line, column, include) {
+        this._ = 'IncludeRule'; this.line = line; this.column = column; this.include = include;
+        this.ruleID = undefined;
+        this.setRuleID = function (ruleID) { this.ruleID = ruleID; }
+        this.label = undefined;
+        this.setLabel = function (label) {  }
+        this.toKey = function () { return this.label.toString() + ' ' + this.toString(); }
+        this.toString = function () {
+            return '& ' + this.include.toString();
+        };
+        this.colorize = function (charmap, idMap) {
+            // @@@ hilight include this.rule.colorize(charmap, idMap);
+        };
+        this.validate = function (schema, point, inOpt, db) {
+            return schema.validatePoint(point, this.include, db, false);
+        };
+        this.SPARQLvalidation = function (schema, label, prefixes, depth, counters, inOpt) {
+            return schema.ruleMap[this.include].SPARQLvalidation(schema, label, prefixes, depth, counters, false);
+        }
+        this.SPARQLremainingTriples = function (schema, label, as, prefixes, depth, counters) {
+            return schema.ruleMap[this.include].SPARQLremainingTriples(schema, label, as, prefixes, depth, counters);
+        }
+        this.toResourceShapes_inline = function (schema, db, prefixes, sePrefix, rsPrefix, depth) {
+            return schema.ruleMap[this.include].toResourceShapes_inline(schema, db, prefixes, sePrefix, rsPrefix, depth);
+        };
+        this.toResourceShapes_standalone = function (schema, db, prefixes, sePrefix, rsPrefix, depth) {
+            return schema.ruleMap[this.include].toResourceShapes_standalone(schema, db, prefixes, sePrefix, rsPrefix, depth);
+        };
+//    IncludeRule: function (line, column, include) {
+        this.toSExpression = function (depth) {
+            var lead = pad(depth, '    ');
+            return lead
+                + "(IncludeRule "
+                + this.parent
+                + ")\n";
+        };
+        this.toHaskell = function (depth) {
+            var lead = pad(depth, '    ');
+            return lead
+                + "(Includerule "
+                + this.parent
+                + ")\n";
+        };
+    },
+
+    // Place-holder rule for e.g. empty parent classes.
+    EmptyRule: function (line, column) {
+        this._ = 'EmptyRule'; this.line = line; this.column = column;
+        this.ruleID = undefined;
+        this.setRuleID = function (ruleID) { this.ruleID = ruleID; }
+        this.label = undefined;
+        this.setLabel = function (label) {  }
+        this.toKey = function () { return "@@empty@@"; }
+        this.toString = function () {
+            return "";
+        };
+        this.colorize = function (charmap, idMap) {
+        };
+        this.validate = function (schema, point, inOpt, db) {
+            var ret = new RDF.ValRes();
+            ret.status = inOpt ? RDF.DISPOSITION.EMPTY : RDF.DISPOSITION.PASS; // nod agreeably
+            return ret;
+        };
+        this.SPARQLvalidation = function (schema, label, prefixes, depth, counters, inOpt) {
+            return new RDF.QueryClause(undefined, "");
+        }
+        this.SPARQLremainingTriples = function (schema, label, as, prefixes, depth, counters) {
+            return new RDF.QueryClause(undefined, "");
+        }
+        this.toResourceShapes_inline = function (schema, db, prefixes, sePrefix, rsPrefix, depth) {
+            return "";
+        };
+        this.toResourceShapes_standalone = function (schema, db, prefixes, sePrefix, rsPrefix, depth) {
+            return "";
+        };
+//    EmptyRule: function (line, column) {
+        this.toSExpression = function (depth) {
+            var lead = pad(depth, '    ');
+            return lead + "(EmptyRule)";
+        };
+        this.toHaskell = function (depth) {
+            var lead = pad(depth, '    ');
+            return lead + "Emptyrule";
         };
     },
 
@@ -1046,6 +1280,7 @@ RDF = {
 
         // AndRule: vs=conjoints.map(validity(_,p,g,o)); if(∃𝕗) return 𝕗;
         // if(∃𝕡∧∃∅) return 𝕗; if(∄𝕡∧∄∅) return 𝜃 else if(∃𝕡) return 𝕡 else return ∅
+        // Note, this FAILs an empty disjunction.
         this.validate = function (schema, point, inOpt, db) {
             var ret = new RDF.ValRes();
             var seenFail = false;
@@ -1067,8 +1302,10 @@ RDF = {
                     // seenEmpty = true;
                     empties.push(r);
             }
-            if (seenFail || passes.length && empties.length)
+            if (passes.length && empties.length) // 
             { ret.status = RDF.DISPOSITION.FAIL; ret.error_mixedOpt(passes, empties, this); }
+            else if (seenFail)
+                ret.status = RDF.DISPOSITION.FAIL
             else if (!passes.length && !empties.length)
                 ret.status = RDF.DISPOSITION.INDEFINITE;
             else
@@ -1120,7 +1357,7 @@ RDF = {
             }
             return new RDF.QueryClause(undefined, ret);
         }
-        this.toResourceShapes_inline = function (db, prefixes, sePrefix, rsPrefix, depth) {
+        this.toResourceShapes_inline = function (schema, db, prefixes, sePrefix, rsPrefix, depth) {
             if (this.ruleID)
                 return rsPrefix + ":conjoint " + this.ruleID.toString();
             var lead = pad(depth, '    ');
@@ -1128,11 +1365,11 @@ RDF = {
             for (var i = 0; i < this.conjoints.length; ++i) {
                 if (i > 0)
                     ret += lead;
-                ret += this.conjoints[i].toResourceShapes_inline(db, prefixes, sePrefix, rsPrefix, depth) + " ;\n";
+                ret += this.conjoints[i].toResourceShapes_inline(schema, db, prefixes, sePrefix, rsPrefix, depth) + " ;\n";
             }
             return ret;
         };
-        this.toResourceShapes_standalone = function (db, prefixes, sePrefix, rsPrefix, depth) {
+        this.toResourceShapes_standalone = function (schema, db, prefixes, sePrefix, rsPrefix, depth) {
             if (!this.ruleID)
                 return '';
             var lead = pad(depth, '    ');
@@ -1141,17 +1378,28 @@ RDF = {
             var ret = '';
             ret += this.ruleID.toString() + "\n";
             for (var i = 0; i < this.conjoints.length; ++i)
-                ret += this.conjoints[i].toResourceShapes_standalone(db, prefixes, sePrefix, rsPrefix, depth);
+                ret += this.conjoints[i].toResourceShapes_standalone(schema, db, prefixes, sePrefix, rsPrefix, depth);
             return ret;
         };
         this.toSExpression = function (depth) {
             var lead = pad(depth, '    ');
             return lead + "(AndRule\n"
                 + this.conjoints.map(function(conj) {
-		    return conj.toSExpression(depth+1); 
-		}).join("")
+                    return conj.toSExpression(depth+1); 
+                }).join("")
                 + lead + ")\n";
         };
+        this.toHaskell = function (depth) {
+            var lead = pad(depth, '    ');
+            return lead + "(And\n"
+                + this.conjoints.map(function(conj) {
+                    return conj.toHaskell(depth+1); 
+                }).join("")
+                + lead + ")\n";
+        };
+        this.prepend = function (elts) {
+            this.conjoints = elts.concat(this.conjoints);
+        }
     },
 
     OrRule: function (line, column, disjoints) {
@@ -1160,7 +1408,7 @@ RDF = {
         this.setRuleID = function (ruleID) { this.ruleID = ruleID; }
         this.label = undefined;
         this.setLabel = function (label) { this.label = label; this.disjoints.map(function (r) { r.setLabel(label); }) ;}
-        this.toKey = function () { return this.label.toString() + ' ' + this.toString(); }
+        this.toKey = function () { return (this.label ? this.label.toString() + ' ' : '') + this.toString(); }
         this.toString = function () {
             return '(' + this.disjoints.map(function (disj) { return '(' + disj.toString() + ')'}).join("|\n") + ')';
         }
@@ -1235,7 +1483,7 @@ RDF = {
             }
             return new RDF.QueryClause(undefined, ret);
         }
-        this.toResourceShapes_inline = function (db, prefixes, sePrefix, rsPrefix, depth) {
+        this.toResourceShapes_inline = function (schema, db, prefixes, sePrefix, rsPrefix, depth) {
             if (this.ruleID)
                 return rsPrefix + ":disjoint " + this.ruleID.toString();
             var lead = pad(depth, '    ');
@@ -1248,15 +1496,15 @@ RDF = {
                     ret += "\n";
                 if (this.disjoints[i]._ === 'AndRule') {
                     ret += "    " + seFix + "ruleGroup [\n";
-                    ret += lead + "        " + this.disjoints[i].toResourceShapes_inline(db, prefixes, sePrefix, rsPrefix, depth+2);
+                    ret += lead + "        " + this.disjoints[i].toResourceShapes_inline(schema, db, prefixes, sePrefix, rsPrefix, depth+2);
                     ret += lead + "    ] ;\n";
                 } else
-                    ret += lead + "    " + this.disjoints[i].toResourceShapes_inline(db, prefixes, sePrefix, rsPrefix, depth+1) + " ;";
+                    ret += lead + "    " + this.disjoints[i].toResourceShapes_inline(schema, db, prefixes, sePrefix, rsPrefix, depth+1) + " ;";
             }
             ret += lead + "]";
             return ret;
         };
-        this.toResourceShapes_standalone = function (db, prefixes, sePrefix, rsPrefix, depth) {
+        this.toResourceShapes_standalone = function (schema, db, prefixes, sePrefix, rsPrefix, depth) {
             if (!this.ruleID)
                 return '';
             var lead = pad(depth, '    ');
@@ -1265,36 +1513,377 @@ RDF = {
             var ret = '';
             ret += this.ruleID.toString() + "\n";
             for (var i = 0; i < this.disjoints.length; ++i)
-                ret += this.disjoints[i].toResourceShapes_standalone(db, prefixes, sePrefix, rsPrefix, depth+1);
+                ret += this.disjoints[i].toResourceShapes_standalone(schema, db, prefixes, sePrefix, rsPrefix, depth+1);
             return ret;
         };
         this.toSExpression = function (depth) {
             var lead = pad(depth, '    ');
             return lead + "(OrRule\n"
                 + this.disjoints.map(function(disj) {
-		    return disj.toSExpression(depth+1); 
-		}).join("")
+                    return disj.toSExpression(depth+1); 
+                }).join("")
+                + lead + ")\n";
+        };
+        this.toHaskell = function (depth) {
+            var lead = pad(depth, '    ');
+            return lead + "(Or\n"
+                + this.disjoints.map(function(disj) {
+                    return disj.toHaskell(depth+1); 
+                }).join("")
                 + lead + ")\n";
         };
     },
 
+    // Example (unsafe) javascript semantic action handler.
+    // Can be used like: schema.eventHandlers = {js: RDF.jsHandler};
+    jsHandler: {
+        _callback: function (code, valRes, context) {
+            eval("function action(_) {" + code + "}");
+            ret = action(context, { message: function (msg) { RDF.message(msg); } });
+            var status = RDF.DISPOSITION.PASS;
+            if (ret === false)
+            { status = RDF.DISPOSITION.FAIL; valRes.error_badEval(code); }
+            return status;
+        },
+        begin: function (code, valRes, context) { return this._callback(code, valRes, context); },
+        post: function (code, valRes, context) { return this._callback(code, valRes, context); }
+    },
+
+    // Example XML generator.
+    // Can be used like:
+    //   schema.eventHandlers = {GenX: RDF.GenXHandler(document.implementation, 
+    //                                                 new XMLSerializer())};
+    GenXHandler: function (DOMImplementation, XMLSerializer) {
+        return {
+            _DOMImplementation:DOMImplementation,
+            _XMLSerializer:XMLSerializer,
+            text: null,
+            _stack: [], // {top:el1, bottom:eln} for some path el1/el2/eln
+            _doc: null,
+            _parse: function (str) {
+                var index = 0;
+                var name = "unspecifiedTag";
+                var ns = "";
+                var attr = false;
+                var val = function (v) { return v; };
+                str = str.trim();
+                var m = str.match(/^(?:\[([0-9-]+)\])?(@)?([^ \t]*)(?:[ \t]+(\$|=|!)([^ \t]*)(?:[ \t]+(\$|=|!)([^ \t]*)(?:[ \t]+(\$|=|!)([^ \t]*))?)?)?/);
+                if (m === null)
+                    throw "\"" + str + "\" is not a valid GenX instruction.";
+                if (m[1])
+                    index = parseInt(m[1]);
+                if (m[2])
+                    attr = true;
+                var parents = m[3].split('/');
+                if (parents) {
+                    name = parents.pop();
+                    if (name[0] == '@') {
+                        attr = true;
+                        name = name.substr(1);
+                    }
+                } else {
+                    parents = [];
+                    name = m[3];
+                }
+                for (i = 4; i < m.length; i += 2)
+                    if (m[i] == '$') {
+                        ns = m[i+1];
+                    } else if (m[i] == '=') {
+                        var pr = "val = function (v) { return v.substr(";
+                        var po = "); }";
+                        var m2;
+                        if ((m2 = m[i+1].match(/^substr\(([0-9]+)\)$/)))
+                            eval(pr + m2[1] + po);
+                        else if ((m2 = m[i+1].match(/^substr\(([0-9]+),([0-9]+)\)$/)))
+                            eval(pr + m2[1] + ", " + m2[2] + po);
+                        else if (m[i+1] == '')
+                            eval("val = function (v) { return ''; };");
+                        else
+                            throw "\"" + m[i+1] + "\" is unsupported";
+                    } else if (m[i] == '!' && m[i+1] == 'debugger') {
+                        debugger;
+                    }
+                return { index:index, ns:ns, attr:attr, name:name, parents:parents, val:val };
+            },
+            _assign: function (now, p, val) {
+                var parents = [];
+                for (var i = 0; i < p.parents.length; ++i) {
+                    var newEl = this._createElement(p.ns, p.parents[i]);
+                    parents.push(newEl);
+                    now.appendChild(newEl)
+                    now = newEl;
+                }
+                val = p.val(val);
+                if (p.attr) {
+                    if (p.index > 0)
+                        now = now.childNodes[p.index];
+                    else if (p.index < 0)
+                        now = now.childNodes[now.childNodes.length+p.index];
+                    now.setAttribute(p.name, val);
+                    return null;
+                } else {
+                    element = this._createElement(p.ns, p.name);
+                    if (val != '')
+                        element.appendChild(this._doc.createTextNode(val));
+                    if (parents.length) {
+                        now.appendChild(element);
+                        return {top:parents[0], bottom:element};
+                    } else
+                        return {top:element, bottom:element};
+                }
+            },
+            _createElement: function (ns, name) {
+                var newEl;
+                if (this._doc === null) {
+                    this._doc = this._DOMImplementation.createDocument
+                    (ns, name, undefined);
+                    if (ns !== undefined) // unnecessary in chromium. nec in https://github.com/jindw/xmldom
+                        this._doc.childNodes[0].setAttribute("xmlns", ns);
+                    newEl = this._doc.childNodes[0];
+                } else {
+                    newEl = this._doc.createElement(name);
+                }
+                return newEl;
+            },
+            beginFindTypes: function () {
+                var el = this._createElement("http://www.w3.org/2013/ShEx/", "findTypesRoot");
+                this._stack.push({top:el, bottom:el});
+            },
+            endFindTypes: function () {
+                var now = this._stack[this._stack.length-1];
+                console.dir(this._doc);
+                this.text = this._XMLSerializer.serializeToString(this._doc);
+            },
+            begin: function (code, valRes, context) {
+                var p = this._parse(code);
+                if (this._stack.length) { // in a findtypes container
+                    var now = this._stack[this._stack.length-1];
+                    var elements = this._assign(now.bottom, p, '');
+                    this._stack.push(elements)
+                } else {
+                    var el = this._createElement(p.ns, p.name);
+                    this._stack.push({top:el, bottom:el});
+                }
+            },
+            end: function (code, valRes, context) {
+                var now = this._stack.pop();
+                console.dir(this._doc);
+                if (this._stack.length) { // in a findtypes container
+                    if (context.status == RDF.DISPOSITION.PASS)
+                        this._stack[this._stack.length-1].bottom.appendChild(now.top);
+                } else {
+                    this.text = this._XMLSerializer.serializeToString(this._doc);
+                }
+            },
+            enter: function (code, valRes, context) {
+                var now = this._stack[this._stack.length-1];
+                var p = this._parse(code);
+                if (p.attr) {
+                    now.bottom.setAttribute(p.name, context.o.lex);
+                } else {
+                    var elements = this._assign(now.bottom, p, context.o.lex);
+                    this._stack.push(elements)
+                }
+            },
+            exit: function (code, valRes, context) {
+                var p = this._parse(code);
+                if (p.attr) {
+                    // was set on the way in.
+                } else {
+                    var now = this._stack.pop();
+                    if (this._stack.length) {
+                        var target = this._stack[this._stack.length-1].bottom;
+                        if (p.index)
+                            target = target.childNodes[p.index];
+                        target.appendChild(now.top);
+                    }
+                }
+            },
+            visit: function (code, valRes, context) {
+                var now = this._stack[this._stack.length-1];
+                var p = this._parse(code);
+                var elements = this._assign(now.bottom, p, context.o.lex);
+                if (elements)
+                    now.bottom.appendChild(elements.bottom);
+            }
+        };
+    },
+
+    // Example JSON generator.
+    // Can be used like:
+    //   schema.eventHandlers = {GenJ: RDF.GenJHandler()};
+    GenJHandler: function () {
+        return {
+            text: null,
+            _stack: [],
+            _context: null,
+            _doc: null,
+            _needId: false,
+            _nsToPrefix: null,
+            _parse: function (str) {
+                var name = "unspecifiedTag";
+                var subjId = false;
+                str = str.trim();
+                var m = str.match(/^([^ @\t]*)?[ \t]*(\@id)?/);
+                if (m === null)
+                    throw "\"" + str + "\" is not a valid GenJ instruction.";
+                name = m[1];
+                if (m[2])
+                    subjId = true;
+                return { subjId:subjId, name:name };
+            },
+            _getNamespace: function (iri) {
+                var slash = iri.lastIndexOf('/');
+                var end = iri.lastIndexOf('#');
+                if (slash == -1 && end == -1)
+                    return 'iri';
+                if (slash > end)
+                    end = slash;
+                var ns = iri.substr(0, end+1);
+                var lname = iri.substr(end+1);
+                if (ns in this._nsToPrefix) {
+                    return this._nsToPrefix[ns]+':'+lname;
+                } else {
+                    var prefix = 'ns'+Object.keys(this._nsToPrefix).length
+                    this._nsToPrefix[ns] = prefix;
+                    this._context[prefix] = ns;
+                    return prefix+':'+lname;
+                }
+            },
+            _registerPredicate: function (tag, iri, dt) {
+                var pname = this._getNamespace(iri);
+                if (dt) {
+                    this._context[tag] = { '@id': pname, '@type': this._getNamespace(dt) };
+                } else {
+                    this._context[tag] = pname;
+                }
+            },
+            _assign: function (now, attr, value) {
+                if (attr in now) {
+                    if (!(now[attr] instanceof Array))
+                        now[attr] = [now[attr]];
+                    now[attr].push(value);
+                } else
+                    now[attr] = value;
+            },
+            begin: function (code, valRes, context) {
+                this._stack.splice(0, this._stack.length);
+                var p = this._parse(code);
+                if (p.subjId)
+                    this._needId = true;
+                this._context = {};
+                this._nsToPrefix = {};
+                this._doc = { '@context': this._context };
+                this._stack.push(this._doc);
+            },
+            end: function (code, valRes, context) {
+                console.dir(this._doc);
+                this.text = JSON.stringify(this._doc);
+            },
+            enter: function (code, valRes, context) {
+                var now = this._stack[this._stack.length-1];
+                var p = this._parse(code);
+                var element = {};
+                this._registerPredicate(p.name, context.p.lex, null);
+                this._assign(now, p.name, element);
+                if (p.subjId)
+                    this._needId = true;
+                this._stack.push(element)
+            },
+            exit: function (code, valRes, context) {
+                var now = this._stack.pop();
+            },
+            visit: function (code, valRes, context) {
+                var now = this._stack[this._stack.length-1];
+                if (this._needId) {
+                    now['@id'] = context.s.lex;
+                    this._needId = false;
+                }
+                var p = this._parse(code);
+                this._assign(now, p.name, context.o.lex);
+                this._registerPredicate(p.name, context.p.lex,
+                                        context.o._ == 'RDFLiteral' && context.o.datatype &&
+                                        context.o.datatype.lex != 'http://www.w3.org/2001/XMLSchema#string'
+                                        ? context.o.datatype.lex
+                                        : null);
+            }
+        };
+    },
+
     Schema: function (line, column) {
-        this._ = 'Schema'; this.line = line; this.column = column; this.ruleMap = {}; this.ruleLabels = []; this.startRule = undefined; this.disableJavascript = false;
-        this.termResults = {};
+        this._ = 'Schema'; this.line = line; this.column = column;
+        this.ruleMap = {};
+        this.ruleLabels = [];
+        this.startRule = undefined;
+        this.eventHandlers = {};
+        this.derivedShapes = {}; // Map parent name to array of 1st generation childrens' rules.
+        this.isVirtualShape = {};
+        this.init = {};
+
+        this.hasDerivedShape = function (parent, child) {
+            if (!(parent.toString() in this.derivedShapes))
+                this.derivedShapes[parent.toString()] = [];
+            this.derivedShapes[parent.toString()].push(child);
+        }
+        this.markVirtual = function (shape) {
+            this.isVirtualShape[shape.label.toString()] = true;
+        }
+        this.getRuleMapClosure = function (name) {
+            var key = name.toString();
+            var _Schema = this;
+                // @@ inject hierarchy here
+                //    this.derivedShapes = {};
+                //    this.isVirtualShape = {};
+
+            // Ugly late-binding of names 'cause they're not known when hasDerivedShape is called.
+            // probably over-complicated way to concatonate descendents.
+            function children (parent) {
+                return _Schema.derivedShapes[parent]
+                    ? [parent].concat(_Schema.derivedShapes[parent].map(function (el) {
+                        return children(el.label.toString());
+                    }).reduce(function (a, b) { return [].concat(a, b) } ))
+                    : [parent];
+            }
+            var disjoints = children(key);
+            disjoints = disjoints.filter(function (el) {
+                return !_Schema.isVirtualShape[el];
+            });
+            if (disjoints.length === 0)
+                throw "no available shape or derived shapes for " + key;
+            disjoints = disjoints.map(function (el) {
+                return _Schema.ruleMap[el];
+            });
+            if (disjoints.length === 1)
+                return disjoints[0];
+            return new RDF.OrRule(this.ruleMap[key].line, this.ruleMap[key].column, disjoints);
+        };
+        this.serializeRule = function (label) {
+            var ret = '';
+            var rule = this.ruleMap[label];
+            if (rule._ == 'UnaryRule') {
+                ret += label + ' {\n' + rule.rule.toString() + '\n}';
+                Object.keys(rule.codes).map(function (k) { ret += ' %' + k + '{' + rule.codes[k] + '%}'; })
+                ret += "\n\n";
+            } else if (rule._ == 'IncludeRule') {
+                ret += ": ";
+                rule.parents.forEach(function (p) { ret += p.toString(); });
+                ret += label + ' {\n' + rule.rule.toString() + '\n}';
+                ret += "\n\n";
+            } else {
+                ret += label + ' {\n' + rule.toString() + '\n}\n\n';
+            }
+            return ret;
+        };
         this.toString = function () {
             var ret = '';
+
+            var Schema = this;
+            if (this.init)
+                Object.keys(this.init).map(function (k) { ret += Schema.init[k] + "\n"; })
             if (this.startRule)
                 ret += "start = " + this.startRule.toString() + "\n\n";
-            for (var label in this.ruleMap) {
-                var rule = this.ruleMap[label];
-                if (rule._ == 'UnaryRule') {
-                    ret += label + ' {\n' + rule.rule.toString() + '\n}';
-                    Object.keys(rule.codes).map(function (k) { ret += ' %' + k + '{' + rule.codes[k] + '%}'; })
-                    ret += "\n\n";
-                } else {
-                    ret += label + ' {\n' + rule.toString() + '\n}\n\n';
-                }
-            }
+            for (var label in this.ruleMap)
+                ret += this.serializeRule(label);
             return ret;
         };
         this.add = function (label, rule) {
@@ -1312,56 +1901,94 @@ RDF = {
             //     this.ruleMap[label].colorize(charmap, idMap);
             return idMap;
         };
-        this.validate = function (point, as, db) {
-            if (point) {
-                var key = point.toString() + ' @' + as;
-                var ret = this.termResults[key];
-                if (ret == undefined) {
+        this.termResults = {}; // temp cache hack -- makes schema validation non-reentrant
+        this.validatePoint = function (point, as, db, subShapes) {
+            // cyclic recursion guard says "am i verifying point as an as in this closure mode?"
+            // with closure: start=<a> <a> { <p1> @<a> } / <s1> <p1> <s1> .
+            //  w/o closure: start={ <p1> @<a> } VIRTUAL <a> { <p2> (1) } <b> & <a> {  } ! <s1> <p1> [ <p2> 2 ] .
+            var key = point.toString() + ' @' + as + "," + subShapes;
+            var ret = this.termResults[key];
+            if (ret == undefined) {
+                this.termResults[key] = new RDF.ValRes(); // temporary empty solution
+                this.termResults[key].status = RDF.DISPOSITION.PASS; // matchedEmpty(this.ruleMap[as.toString()]);
+                if (subShapes)
+                    ret = this.getRuleMapClosure(as).validate(this, point, false, db);
+                else
                     ret = this.ruleMap[as.toString()].validate(this, point, false, db);
-                    this.termResults[key] = ret;
-                }
-                return ret;
-            } else {
-                var ret = new RDF.ValRes();
-                ret.status = RDF.DISPOSITION.PASS;
+                this.termResults[key] = ret;
+            }
+            return ret;
+        };
 
-                // Get all of the subject nodes.
-                var subjects = [];
-                for (var i = 0; i < db.triples.length; ++i) {
-                    var t = db.slice(i)[0].s;
-                    if (subjects.indexOf(t) == -1)
-                        subjects.push(t);
-                }
+        // usual interface for validating a pointed graph
+        this.validate = function (point, db) {
+            this.dispatch('begin', this.init, null, null);
+            var ret = this.validatePoint(point, this.startRule, db, true);
+            this.dispatch('end', this.init, null, null); // this.init isn't actually called.
+            return ret;
+        };
 
-                // Walk through subjects and rules
-                for (var si = 0; si < subjects.length; ++si) {
-                    var s = subjects[si];
-                    for (var ri = 0; ri < this.ruleLabels.length; ++ri) {
-                        var rule = this.ruleLabels[ri];
-                        var res = this.validate(s, rule, db);
+        // usual interface for finding types in a graph
+        this.findTypes = function (db) {
+            var ret = new RDF.ValRes(); // accumulate validation successes.
+            ret.status = RDF.DISPOSITION.PASS;
+
+            // Get all of the subject nodes.
+            // Note that this DB has different objects for each
+            // lexical instantiation of an RDF node so we key on
+            // the string (N-Triples) representations.
+            var subjects = {};
+            for (var i = 0; i < db.triples.length; ++i) {
+                var t = db.slice(i)[0].s;
+                var s = t.toString();
+                if (subjects[s] === undefined)
+                    subjects[s] = t;
+            }
+
+            for (var handler in this.handlers)
+                if ('beginFindTypes' in this.handlers[handler])
+                    this.handlers[handler]['beginFindTypes']();
+            // For each (distinct) subject node s,
+            for (var sStr in subjects) {
+                var s = subjects[sStr];
+
+                // for each rule label ruleLabel,
+                for (var ri = 0; ri < this.ruleLabels.length; ++ri) {
+                    var ruleLabel = this.ruleLabels[ri];
+
+                    // if the labeled rule not VIRTUAL,
+                    if (!this.isVirtualShape[ruleLabel.toString()]) {
+
+                        // test s against that rule (but not its subshapes).
+                        this.dispatch('begin', this.init, null, null);
+                        var res = this.validatePoint(s, ruleLabel, db, false);
+                        this.dispatch('end', this.init, null, res); // this.init isn't actually called.
+
+                        // If it passed or is indeterminate,
                         if (res.status !== RDF.DISPOSITION.FAIL) {
-                            message(s.toString() + " is a " + rule.toString());
-                            // ret.add(res);
-                            var t = new RDF.Triple(s, new RDF.IRI(0,0,0,0,"http://open-services.net/ns/core#instanceShape"), rule);
-                            ret.matchedTree(this.ruleMap[rule], t, res);
+
+                            // record the success.
+                            message(sStr + " is a " + ruleLabel.toString());
+                            var t = new RDF.Triple(s, new RDF.IRI(0,0,0,0,"http://open-services.net/ns/core#instanceShape"), ruleLabel);
+                            ret.matchedTree(this.ruleMap[ruleLabel], t, res);
                         }
                     }
                 }
-                return ret;
             }
+            for (var handler in this.handlers)
+                if ('endFindTypes' in this.handlers[handler])
+                    this.handlers[handler]['endFindTypes']();
+            return ret;
         };
-        this.dispatch = function (codes, valRes, context) {
-            for (var key in this.codes) { // Use each to access codes.js 'cause i don't want
-                if (key == "js" && !this.disableJavascript) {        // to leave behind a codes.js = undefined artifact.
-                    eval("function action(_) {" + this.codes[key].code + "}");
-                    ret = action(context);
-                    var status = RDF.DISPOSITION.PASS;
-                    if (ret === false)
-                        { status = RDF.DISPOSITION.FAIL; valRes.error_badEval(codes[key]); }
-                    return status;
+        this.dispatch = function (event, codes, valRes, context) {
+            var ret = RDF.DISPOSITION.PASS;
+            for (var key in codes)
+                if (this.handlers[key] && this.handlers[key][event]) {
+                    var ex = this.handlers[key][event](codes[key].code, valRes, context);
+                    if (ex == RDF.DISPOSITION.FAIL)
+                        ret = RDF.DISPOSITION.FAIL;
                 }
-            }
-            return RDF.DISPOSITION.PASS;
+            return ret;
         };
         this.seen = {};
         this.SPARQLvalidation2 = function (func, prefixes, prepend, append) {
@@ -1440,11 +2067,11 @@ SELECT ?s ?p ?o {\n\
             for (var label in this.ruleMap) {
                 var rule = this.ruleMap[label];
                 ret += label + " a " + rsPrefix + ":ResourceShape ;\n"
-                ret += "    " + rule.toResourceShapes_inline(dbCopy, prefixes, sePrefix, rsPrefix, 1) + " .\n";
+                ret += "    " + rule.toResourceShapes_inline(this, dbCopy, prefixes, sePrefix, rsPrefix, 1) + " .\n";
             }
             for (var label in this.ruleMap) {
                 var rule = this.ruleMap[label];
-                ret += rule.toResourceShapes_standalone(dbCopy, prefixes, sePrefix, rsPrefix, 1);
+                ret += rule.toResourceShapes_standalone(this, dbCopy, prefixes, sePrefix, rsPrefix, 1);
             }
             if (dbCopy.triples.length != 0)
                 ret += "# remaining triples:\n" + dbCopy.toString();
@@ -1457,8 +2084,102 @@ SELECT ?s ?p ?o {\n\
                 + Object.keys(this.ruleMap).map(function (k) {
                     return "'(" + k + "\n"
                         + Schema.ruleMap[k].toSExpression(depth+1)
-			+" )\n"
+                        +" )\n"
                 }).join("")+")";
+        };
+        this.toHaskell = function (depth) {
+            if (depth === undefined) depth=0;
+            var Schema = this;
+            return "(Schema\n"
+                + Object.keys(this.ruleMap).map(function (k) {
+                    return "(" + k + "->\n"
+                        + Schema.ruleMap[k].toHaskell(depth+1)
+                        +" )\n"
+                }).join("")+")";
+        };
+        this.partition = function (includes, looseEnds, needed) {
+            looseEnds = typeof looseEnds !== 'undefined' ? looseEnds : {};
+            needed = typeof needed !== 'undefined' ? needed : {};
+            var uses = {};
+            var Schema = this; // this is apparently unavailable in _walk.
+            function _walk (rule, parents) {
+                function _dive (into) {
+                    if (parents.indexOf(into) === -1) {
+                        parents.map(function (p) {
+                            if (uses[p] === undefined)
+                                uses[p] = [];
+                            uses[p].push(into);
+                        });
+                        var next = Schema.ruleMap[into];
+                        if (next === undefined) {
+                            if (looseEnds[into] === undefined)
+                                looseEnds[into] = { p:[] };
+                            var p = parents[parents.length-1];
+                            if (looseEnds[into][p] === undefined)
+                                looseEnds[into][p] = [];
+                            looseEnds[into][p].push(rule.toString());
+                        } else {
+                            parents.push(into);
+                            _walk(next, parents);
+                            parents.pop();
+                        }
+                    }
+                };
+                switch (rule._) {
+                case "AtomicRule":
+                    if (rule.valueClass._== "ValueReference")
+                        _dive(rule.valueClass.label.toString());
+                    break;
+                case "UnaryRule":
+                    _walk(rule.rule, parents);
+                    break;
+                case "IncludeRule":
+                    _dive(rule.include.toString());
+                    break;
+                case "EmptyRule":
+                    break;
+                case "AndRule":
+                    for (var conj = 0; conj < rule.conjoints.length; ++conj)
+                        _walk(rule.conjoints[conj], parents);
+                    break;
+                case "OrRule":
+                    for (var disj = 0; disj < rule.disjoints.length; ++disj)
+                        _walk(rule.disjoints[disj], parents);
+                    break;
+                default: throw "what's a \"" + rule._ + "\"?"
+                }
+            };
+            for (var ri = 0; ri < this.ruleLabels.length; ++ri) {
+                var ruleLabel = this.ruleLabels[ri];
+                if (!this.isVirtualShape[ruleLabel.toString()])
+                    _walk(this.ruleMap[ruleLabel], [ruleLabel]); // this.getRuleMapClosure
+            }
+
+            //for (var p in uses) {
+            for (var i = 0; i < includes.length; ++i) {
+                var p = includes[i];
+                needed[p] = true;
+                for (var c in uses[p]) needed[uses[p][c]] = true;
+            }
+
+
+            ret = new RDF.Schema(this.line, this.column);
+            ret.startRule = this.startRule;
+            ret.eventHandlers = this.eventHandlers;
+            ret.derivedShapes = {};
+            ret.isVirtualShape = {};
+            ret.init = this.init;
+            for (var ri = 0; ri < this.ruleLabels.length; ++ri) {
+                var ruleLabel = this.ruleLabels[ri];
+                var ruleLabelStr = ruleLabel.toString();
+                if (needed[ruleLabelStr]) {
+                    ret.derivedShapes[ruleLabelStr] = this.derivedShapes[ruleLabelStr];
+                    if (this.isVirtualShape[ruleLabelStr])
+                        ret.isVirtualShape[ruleLabelStr] = true;
+                    ret.add(ruleLabel, this.ruleMap[ruleLabelStr]);
+                }
+            }
+            return ret;
         };
     },
 
@@ -1664,23 +2385,23 @@ SELECT ?s ?p ?o {\n\
         RuleFailEval = function (codeObj, solution) {
             this._ = 'RuleFailEval'; this.codeObj = codeObj; this.solution = solution;
             this.toString = function (depth) {
-                return pad(depth) + "eval of {" + codeObj.code + "} rejected [[\n"
+                return pad(depth) + "eval of {" + this.codeObj + "} rejected [[\n"
                     + solution.matches.map(function (m) {
                         return m.toString(depth+1)+"\n";
                     }).join("") + "    ]]";
             };
             this.toHTML = function (depth, schemaIdMap, dataIdMap, solutions, classNames) {
-            var sOrdinal = solutions.length;
-            solutions.push({}); // @@ needed?
+                var sOrdinal = solutions.length;
+                solutions.push({}); // @@ needed?
 
-            var ret = pad(depth)
-                + "<span id=\"s"+sOrdinal+"\" onClick='hilight(["+sOrdinal+"], [], []);' class=\"error\">"
-                + "eval of {" + codeObj.code + "} rejected [[\n"
-                + solution.matches.map(function (m) {
-                      return m.toString(2).replace(/</gm, '&lt;').replace(/>/gm, '&gt;')+"\n";
-                  }).join("") + "    ]]"
-                + "</span>";
-            return ret;
+                var ret = pad(depth)
+                    + "<span id=\"s"+sOrdinal+"\" onClick='hilight(["+sOrdinal+"], [], []);' class=\"error\">"
+                    + "eval of {" + this.codeObj + "} rejected [[\n"
+                    + solution.matches.map(function (m) {
+                        return m.toString(2).replace(/</gm, '&lt;').replace(/>/gm, '&gt;')+"\n";
+                    }).join("") + "    ]]"
+                    + "</span>";
+                return ret;
             }
         },
         this.error_badEval = function (codeObj)  {
@@ -1785,6 +2506,7 @@ SELECT ?s ?p ?o {\n\
             ret += this.matches.map(function (m) { return m.toHTML(depth+1, schemaIdMap, dataIdMap, solutions, classNames); }).join("\n");
             return ret + "\n" + p + "}";
         }
-    }
+    },
+
 //    curSchema: new this.Schema()
 };
