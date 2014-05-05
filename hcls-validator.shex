@@ -1,4 +1,4 @@
-#BASE <http://base.example/#>
+BASE <http://base.example/#>
 
 PREFIX dcat: <http://www.w3.org/ns/dcat#>
 PREFIX dct: <http://purl.org/dc/terms/>
@@ -19,9 +19,9 @@ start = <EntryLevelShape>
     rdf:type (dctypes:Dataset),
     dct:title xsd:string,  ### should be rdf:langString 
     dct:description xsd:string, ### should be rdf:langString 
-    dct:publisher rdf:Resource,
-    (foaf:page rdf:Resource)?,
-    dct:license rdf:Resource,
+    dct:publisher IRI,
+    (foaf:page IRI)?,
+    dct:license IRI,
     dct:accrualPeriodicity freq:~?
 }
 
@@ -32,12 +32,12 @@ start = <EntryLevelShape>
     # Ensure that at least one of created or issued dates is provided
     (dct:created xsd:dateTime, dct:issued xsd:dateTime? |
         dct:created xsd:dateTime?, dct:issued xsd:dateTime),
-    #This form does not work! dct:creator (rdf:Resource xsd:string)?,
-    (dct:creator rdf:Resource* |
+    #This form does not work! dct:creator (IRI xsd:string)?,
+    (dct:creator IRI* |
     	dct:creator xsd:string*),
-    dct:publisher rdf:Resource,
-    (foaf:page rdf:Resource)?,
-    dct:license rdf:Resource,
+    dct:publisher IRI,
+    (foaf:page IRI)?,
+    dct:license IRI,
     dct:language lexvo:~*,
     pav:version xsd:string?,
     pav:previousVersion @<VersionLevelShape>?,
@@ -55,16 +55,16 @@ start = <EntryLevelShape>
     # Ensure that at least one of created or issued dates is provided
     (dct:created xsd:dateTime, dct:issued xsd:dateTime? |
         dct:created xsd:dateTime?, dct:issued xsd:dateTime),
-    (dct:creator rdf:Resource* |
+    (dct:creator IRI* |
     	dct:creator xsd:string*),
-    dct:publisher rdf:Resource,
-    (foaf:page rdf:Resource)?,
-    dct:license rdf:Resource,
+    dct:publisher IRI,
+    (foaf:page IRI)?,
+    dct:license IRI,
     dct:language lexvo:~*,
     pav:version xsd:string?,
     pav:previousVersion @<DistributionLevelShape>?,
-    (dct:format rdf:Resource? | dct:format xsd:string?),
-    dcat:downloadURL rdf:Resource?
+    (dct:format IRI? | dct:format xsd:string?),
+    dcat:downloadURL IRI?
 }
 
 <RDFDistributionLevelShape> {
@@ -74,33 +74,33 @@ start = <EntryLevelShape>
     # Ensure that at least one of created or issued dates is provided
     (dct:created xsd:dateTime, dct:issued xsd:dateTime? |
         dct:created xsd:dateTime?, dct:issued xsd:dateTime),
-    (dct:creator rdf:Resource* |
+    (dct:creator IRI* |
     	dct:creator xsd:string*),
-    dct:publisher rdf:Resource,
-    (foaf:page rdf:Resource)?,
-    dct:license rdf:Resource,
+    dct:publisher IRI,
+    (foaf:page IRI)?,
+    dct:license IRI,
     dct:language lexvo:~*,
-    void:vocabulary rdf:Resource*,
+    void:vocabulary IRI*,
     pav:version xsd:string,
     pav:previousVersion @<RDFDistributionLevelShape>?,
     dct:format ("text/turtle" "application/rdf+xml" "text/plain" "text/rdf+n3"),
-    void:dataDump rdf:Resource*,
+    void:dataDump IRI*,
     void:triples xsd:integer?,
     void:entities xsd:integer?,
     void:distinctSubjects xsd:integer?,
     void:properties xsd:integer?,
     void:distinctObjects xsd:integer?,
-    sd:namedGraph rdf:Resource?,
+    sd:namedGraph IRI?,
     void:propertyPartition @<PropertyPartitionShape>*,
     void:classPartition @<ClassPartitionShape>*
 }
 
 <PropertyPartitionShape> {
-	void:property rdf:Resource,
+	void:property IRI,
 	void:triples xsd:integer
 }
 
 <ClassPartitionShape> {
-	void:class rdf:Resource,
+	void:class IRI,
 	void:entities xsd:integer
 }

@@ -1,4 +1,4 @@
-#BASE <http://rdf.ebi.ac.uk/chembl/>
+BASE <http://rdf.ebi.ac.uk/chembl/>
 
 PREFIX dcat: <http://www.w3.org/ns/dcat#>
 PREFIX dct: <http://purl.org/dc/terms/>
