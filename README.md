@@ -3,6 +3,8 @@ HCLSValidator
 
 Validator for HCLS dataset descriptions
 
+You can try out the latest version from git here http://htmlpreview.github.io/?https://github.com/AlasdairGray/HCLSValidator/blob/master/validator.html
+
 This validator is based on the Shape Expressions being developed by Eric Prud'hommeaux. 
 
 You can find a primer for Shape Expressions at http://www.w3.org/2013/ShEx/Primer.html
