@@ -7,6 +7,7 @@ PREFIX lexvo: <http://lexvo.org/id/iso639-3/>
 PREFIX pav: <http://purl.org/pav/>
 PREFIX prov: <http://www.w3.org/ns/prov#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX schemaorg: <http://schema.org/>
 PREFIX sd: <http://www.w3.org/ns/sparql-service-description#>
 PREFIX void: <http://rdfs.org/ns/void#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -17,10 +18,51 @@ start = <SummaryLevelShape>
     rdf:type (dctypes:Dataset),
     dct:title xsd:string,  ### should be rdf:langString 
     dct:description xsd:string, ### should be rdf:langString 
+###negate dct:created .,
+###negate pav:createdOn .,
+###negate pav:authoredOn .,
+###negate pav:curatedOn .,
+###negate dct:creator .,
+###negate dct:contributor .,
+###negate pav:createdBy .,
+###negate pav:authoredBy .,
+###negate pav:curatedBy .,
+###negate dct:issued .,
     dct:publisher IRI,
     (foaf:page IRI)?,
+    (schemaorg:logo IRI)?,
     dct:license IRI
-    ###dct:accrualPeriodicity freq:~?
+###negate dct:language .,
+###negate void:vocabulary .,
+###negate dct:conformsTo .,
+###negate void:subset .,
+###negate idot:identifierPattern .,
+###negate void:uriRegexPattern .,
+###negate idot:exampleIdentifier .,
+###negate void:exampleResource .,
+###negate void:inDataset .,
+###negate pav:version .,
+###negate dct:isVersionOf .,
+###negate pav:previousVersion .,
+###negate dct:source .,
+###negate pav:retrievedFrom .,
+###negate prov:wasDerivedFrom .,
+###negate pav:createdWith .,
+    ###dct:accrualPeriodicity freq:~?,
+###negate dct:format .,
+###negate dcat:distribution .,
+###negate dcat:downloadURL .,
+###negate void:dataDump .,
+###negate dcat:landingPage .,
+###negate void:triples .,
+###negate void:entities .,
+###negate void:distinctSubjects .,
+###negate void:properties .,
+###negate void:distinctObjects .,
+###negate sd:namedGraph .,
+###negate void:propertyPartition .,
+###negate void:classPartition .,
+###negate void:subset .,
 }
 
 <VersionLevelShape> {
