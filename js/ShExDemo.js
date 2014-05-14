@@ -34,7 +34,9 @@ ShExDemo = function() {
     }
 
     function buildErrorMessage(e) {
-        return e.line !== undefined && e.column !== undefined
+        return (typeof(e) !== "object" || e.name !== "SyntaxError")
+            ? e
+            : e.line !== undefined && e.column !== undefined
             ? "Line " + e.line + ", column " + e.column + ": " + e.message
             : e.message;
     }
@@ -72,12 +74,32 @@ ShExDemo = function() {
     }
 
     function sanitizeEditable (element) {
-        element.innerHTML = element.innerHTML
-            .replace(/<div>/g, "\n").replace(/<\/div>/g, "") // chromium
-            .replace(/<br>/g, "\n")                          // firefox
-            .replace(/&nbsp;/g, " ")                         // nbsps in pirate pad
-                                                             // ...?
-        ;
+        if (element.innerHTML.search(/<div>|<br>|&nbsp;/) != -1)
+            element.innerHTML = element.innerHTML
+                .replace(/<div>/g, "\n").replace(/<\/div>/g, "") // chromium
+                .replace(/<br>/g, "\n")                          // firefox
+                .replace(/&nbsp;/g, " ")                         // nbsps in pirate pad
+                                                                 // ...?
+            ;
+    }
+
+    function textValue (id, newValue, fromPre) {
+        if (fromPre === undefined)
+            fromPre = $("#ctl-colorize").is(":checked");
+        var ret;
+
+        if (fromPre) {
+            var element = $(id + " pre").get(0);
+            sanitizeEditable(element);
+            ret = $(id + " pre").text(); // element.innerText
+            if (newValue !== undefined)
+                $(id + " pre").text(newValue); // element.innerText = newValue;
+        } else {
+            ret = $(id + " textarea").val();
+            if (newValue !== undefined)
+                $(id + " textarea").val(newValue);
+        }
+        return ret;
     }
 
     // Interface object.
@@ -87,8 +109,10 @@ ShExDemo = function() {
     //   iface.allDataIsLoaded();
     var iface = {
         validator: null, schemaIdMap: null,
-        graph: null, dataIdMap: null,
+        graph: null, dataIdMap: null, dataIRIResolver: null,
         queryParms: {},
+        GenXwindow: undefined,
+        GenJwindow: undefined,
 
         // Logging utilities
         message: function (m) {
@@ -122,12 +146,12 @@ ShExDemo = function() {
 
             // reload saved state if there is one
             $("a").click( function() {
-                $("#schema .save").val(escape($("#schema .textInput").val()));
-                $("#data .save"  ).val(escape($("#data .textInput"  ).val()));
+                $("#schema .save").val(escape(textValue("#schema")));
+                $("#data .save"  ).val(escape(textValue("#data"  )));
             } );
             if ($("#schema .save").val()) {
-                $("#schema .textInput").val(unescape($("#schema .save").val()));
-                $("#data .textInput"  ).val(unescape($("#data .save"  ).val()));
+                textValue("#schema", unescape($("#schema .save").val()));
+                textValue("#data"  , unescape($("#data   .save").val()));
                 iface.allDataIsLoaded();
             } else {
                 var parseQueryString = function(query) {
@@ -163,11 +187,12 @@ ShExDemo = function() {
                     if (list.length) {
                         $.ajax({
                             type: 'GET',
+                            //contentType: 'text/plain',{turtle,shex}
                             url: list[0],
                             success: function(data, textStatus, jqXHR) {
                                 if (/^([a-z]+:)?\/\//g.test(list[0]))
                                     $('#opt-disable-js').attr('checked', true);
-                                into.val(into.val()+data);
+                                textValue(into, textValue(into)+data);
                                 getSequenceOfURLs(list.slice(1), into, done);
                             },
                             error: function(jqXHR, textStatus, errorThrown) {
@@ -182,12 +207,12 @@ ShExDemo = function() {
                     }
                 }
                 if (iface.queryParms['schemaURL']) {
-                    $("#schema .textInput").val('');
-                    getSequenceOfURLs(iface.queryParms['schemaURL'], $("#schema .textInput"), joinAndRun);
+                    textValue("#schema", "");
+                    getSequenceOfURLs(iface.queryParms['schemaURL'], "#schema", joinAndRun);
                 }
                 if (iface.queryParms['dataURL']) {
-                    $("#data .textInput").val('');
-                    getSequenceOfURLs(iface.queryParms['dataURL'], $("#data .textInput"), joinAndRun);
+                    textValue("#data", "");
+                    getSequenceOfURLs(iface.queryParms['dataURL'  ], "#data"  , joinAndRun);
                 }
             }
             $.get(SCHEMA_FILE, function(data) {
@@ -213,11 +238,11 @@ ShExDemo = function() {
             if (iface.queryParms['schema'])
                 iface.queryParms['schema'].forEach(function(s) {
                     $('#opt-disable-js').attr('checked', true);
-                    $("#schema .textInput").val($("#schema .textInput").val()+s);
+                    textValue("#schema", $("#schema .textInput").val()+s);
                 });
             if (iface.queryParms['data'])
                 iface.queryParms['data'].forEach(function(s) {
-                    $("#data .textInput").val($("#data .textInput").val()+s);
+                    textValue("#data", $("#data .textInput").val()+s);
                 });
 
             // Query parms will be rebuilt on event timeouts.
@@ -237,13 +262,27 @@ ShExDemo = function() {
                        iface.handleParameterUpdate);
 
             iface.layoutPanels();
-            $(window).resize(iface.layoutPanels);
+            $(window).resize(iface.handleResize);
 
             $("#apology").hide();
             $("#main").show();
             $("#schema .textInput, #data .textInput, #starting-node, #opt-pre-typed, #opt-find-type, #opt-disable-js")
                 .removeAttr("disabled");
             $("#schema .textInput").focus(); // set focus after removeAttr("disabled").
+            if (iface.queryParms['colorize']) { // switch to pre after unhiding.
+                $("#ctl-colorize").prop( "checked", true );
+                iface.enablePre();
+            }
+            if (iface.queryParms['find-types']) { // switch to pre after unhiding.
+                $("#opt-pre-typed").prop( "checked", false );
+                $("#opt-find-type").prop( "checked", true );
+            }
+            else if (iface.queryParms['starting-node']) { // switch to pre after unhiding.
+                $("#opt-pre-typed").prop( "checked", true );
+                $("#opt-find-type").prop( "checked", false );
+                $("#starting-node").val(iface.queryParms['starting-node'][0]);
+            }
+
             iface.parseSchema();
             iface.parseData();
             iface.validate();
@@ -264,11 +303,8 @@ ShExDemo = function() {
             }, TIMEOUT);
         },
 
-        handleSchemaUpdate: function() {
-            var now = $("#ctl-colorize").is(":checked")
-                ? $("#schema").find("pre").get(0).innerText
-                : $("#schema .textInput").val();
-            if (now === last["#schema .textInput"])
+        handleSchemaUpdate: function(ev) {
+            if (textValue("#schema") === last["#schema .textInput"])
                 return;
 
             iface.clearTimer(SCHEMA);
@@ -277,15 +313,22 @@ ShExDemo = function() {
         },
 
         handleDataUpdate: function() {
-            var now = $("#ctl-colorize").is(":checked")
-                ? $("#data").find("pre").get(0).innerText
-                : $("#data .textInput").val();
-            if (now === last["#data .textInput"])
+            if (textValue("#data") === last["#data .textInput"])
                 return;
 
             iface.clearTimer(DATA);
             iface.clearTimer(VALPARM);
             iface.setTimer(DATA, function() { iface.parseData() && iface.validator && iface.validate(); });
+        },
+
+        updateURLParameters: function() {
+            if ($("#opt-find-type").is(":checked")) { // vs. opt-pre-typed
+                iface.queryParms['find-types'] = ["true"];
+                delete iface.queryParms['starting-node'];
+            } else {
+                delete iface.queryParms['find-types'];
+                iface.queryParms['starting-node'] = [$("#starting-node").val()];
+            }
         },
 
         handleParameterUpdate: function() {
@@ -299,18 +342,12 @@ ShExDemo = function() {
 
             iface.clearTimer(VALPARM);
             iface.setTimer(VALPARM, function() { iface.validate(); });
+            iface.updateURLParameters();
         },
 
         // Factors out code common to schema and data parsers.
         runParser: function(id, label, colorClass, parse) {
-            var now;
-            if ($("#ctl-colorize").is(":checked")) {
-                var element = $(id + " pre").get(0);
-                sanitizeEditable(element);
-                now = element.innerText
-            } else {
-                now = $(id + " .textInput").val();
-            }
+            var now = textValue(id);
 
             last[id + " .textInput"] = now;
             iface.queryParms[id.substr(1)] = [now];
@@ -344,24 +381,33 @@ ShExDemo = function() {
         parseSchema: function() {
             $("#view a").addClass("disabled");
             iface.validator = null;
+            var schemaIRIResolver = RDF.createIRIResolver();
             try {
                 var ret = iface.runParser("#schema", "Schema", "schema-color", function(text) {
-                    return ShExParser.parse(SCHEMA_TEXT, "ShExDoc");
+                    return ShExParser.parse(SCHEMA_TEXT, {iriResolver: schemaIRIResolver});
                 });
                 iface.validator = ret.obj;
                 iface.schemaIdMap = ret.idMap;
                 enableValidatorLink();
                 if (iface.graph)
                     enableValidatorInput();
-                var dtp = "data:text/plain;charset=utf-8;base64,";
-                $("#as-sparql-query"     ).attr("href", dtp + Base64.encode(iface.validator.SPARQLvalidation(RDF.Prefixes)));
-                $("#as-remaining-triples").attr("href", dtp + Base64.encode(iface.validator.SPARQLremainingTriples(RDF.Prefixes)));
-                var prefixes = RDF.Prefixes; // copy by value if we need to do anything with the orig.
-                prefixes['se'] = "http://www.w3.org/2013/ShEx/Definition#";
-                prefixes['rs'] = "http://open-services.net/ns/core#";
-                $("#as-resource-shape"   ).attr("href", dtp + Base64.encode(iface.validator.toResourceShapes(prefixes, 'se', 'rs')));
-                $("#as-resource-sexpr"   ).attr("href", dtp + Base64.encode(iface.validator.toSExpression(0)));
-                $("#view a").removeClass("disabled");
+                if (iface.validator.startRule) {
+                    var dtp = "data:text/plain;charset=utf-8;base64,";
+                    $("#as-sparql-query"     ).attr("href", dtp + Base64.encode(iface.validator.SPARQLvalidation(schemaIRIResolver.Prefixes)));
+                    $("#as-remaining-triples").attr("href", dtp + Base64.encode(iface.validator.SPARQLremainingTriples(schemaIRIResolver.Prefixes)));
+                    var prefixes = schemaIRIResolver.clone().Prefixes;
+                    prefixes['se'] = "http://www.w3.org/2013/ShEx/Definition#";
+                    prefixes['rs'] = "http://open-services.net/ns/core#";
+                    prefixes['shex'] = "http://www.w3.org/2013/ShEx/ns#";
+                    $("#as-resource-shape"   ).attr("href", dtp + Base64.encode(iface.validator.toResourceShapes(prefixes, 'se', 'rs')));
+                    $("#as-resource-sexpr"   ).attr("href", dtp + Base64.encode(iface.validator.toSExpression(0)));
+                    $("#as-resource-haskell" ).attr("href", dtp + Base64.encode(iface.validator.toHaskell(0)));
+                }
+                if (textValue("#schema") === '') {
+                    $("#schema .message").append("<div id=\"emptySchema\"><h3>Empty Schema</h3>An empty schema is valid, but you might want to see <a href=\"Examples\" style='background-color: yellow;'>some examples</a>.</div>");
+                    $("#emptySchema").css("position","absolute").css("top",($("#schema .textInput").height()/3)+"px").css("left","3em");
+                } else
+                    $("#view a").removeClass("disabled");
             } catch (e) {
                 $("#schema .message").attr("class", "message error").text(buildErrorMessage(e));
                 var unavailable = "data:text/plain;charset=utf-8;base64,"
@@ -370,16 +416,19 @@ ShExDemo = function() {
                 $("#as-remaining-triples").attr("href", unavailable);
                 $("#as-resource-shape"   ).attr("href", unavailable);
                 $("#as-resource-sexpr"   ).attr("href", unavailable);
+                $("#as-resource-haskell" ).attr("href", unavailable);
             }
-//            iface.layoutPanels();
+
+            iface.updateURL();
             return iface.validator !== null;
         },
 
         parseData: function() {
             iface.graph = null;
+            iface.dataIRIResolver = RDF.createIRIResolver();
             try {
                 var ret = iface.runParser("#data", "Data", "data-color", function(text) {
-                    return TurtleParser.parse(text);
+                    return TurtleParser.parse(text, {iriResolver: iface.dataIRIResolver});
                 });
                 iface.graph = ret.obj;
                 iface.dataIdMap = ret.idMap;
@@ -387,13 +436,16 @@ ShExDemo = function() {
                     enableValidatorLink();
                     enableValidatorInput();
                 }
-                if (iface.graph.length())
+                if (iface.graph.length() &&
+                    iface.graph.triplesMatching_str($("#starting-node").val(), undefined, undefined).length === 0) {
                     $("#starting-node").val(iface.graph.slice(0,1)[0].s);
+                    iface.updateURLParameters();
+                }
             } catch (e) {
                 $("#data .message").attr("class", "message error").text(buildErrorMessage(e));
             }
 
-//            iface.layoutPanels();
+//            iface.updateURL();
             return iface.graph !== null;
         },
 
@@ -401,28 +453,52 @@ ShExDemo = function() {
             if (!iface.validator || !iface.graph)
                 return;
 
-            last["#starting-node"]     = $("#starting-node").val();
+            last["#starting-node"]  = $("#starting-node").val();
             last["#opt-pre-typed"]  = $("#opt-pre-typed").is(":checked"),
             last["#opt-disable-js"] = $("#opt-disable-js").is(":checked")
 
             $("#validation-messages").text("");
+            $("#schema .textInput .error").removeClass("error");
+            $("#data .textInput .error").removeClass("error");
 
             try {
                 var timeBefore = (new Date).getTime();
                 iface.validator.termResults = {}; // clear out yester-cache
 
-                iface.validator.disableJavascript = $("#opt-disable-js").is(":checked");
+                iface.validator.handlers = {
+                    GenX: RDF.GenXHandler(document.implementation, new XMLSerializer()),
+                    GenJ: RDF.GenJHandler({})
+                };
+                if (!$("#opt-disable-js").is(":checked"))
+                    iface.validator.handlers['js'] = RDF.jsHandler;
                 if (iface.validator.disableJavascript)
                     iface.message("javascript disabled");
 
                 var validationResult
                 if ($("#opt-pre-typed").is(":checked") && iface.validator.startRule) {
                     var startingNode = $("#starting-node").val();
-                    iface.message("validating " + startingNode + " as " + iface.validator.startRule.toString());
-                    validationResult = iface.validator.validate(startingNode, iface.validator.startRule, iface.graph);
+                    if (startingNode.charAt(0) == '_' && startingNode.charAt(1) == ':') {
+                        startingNode = new RDF.BNode(0, 0, 0, 0, startingNode.substr(2))
+                    } else {
+                        if (startingNode.charAt(0) != '<') {
+                            var colon = startingNode.indexOf(":");
+                            if (colon === -1)
+                                throw "pre-typed graph node must be an <iri> or q:name";
+                            startingNode
+                                = '<'
+                                + iface.dataIRIResolver.getPrefix(startingNode.substring(0,colon))
+                                + startingNode.substring(colon+1)
+                                + '>';
+                        }
+                        startingNode = new RDF.IRI(0, 0, 0, 0, 
+                            iface.dataIRIResolver.getAbsoluteIRI(startingNode.substr(1,startingNode.length-2))
+                                                  );
+                    }
+                    iface.message("Validating " + startingNode + " as " + iface.validator.startRule.toString() + ".");
+                    validationResult = iface.validator.validate(startingNode, iface.graph);
                 } else {
                     iface.message("looking for types");
-                    validationResult = iface.validator.validate(undefined, iface.validator.startRule, iface.graph);
+                    validationResult = iface.validator.findTypes(iface.graph);
                 }
 
                 var timeAfter = (new Date).getTime();
@@ -441,6 +517,50 @@ ShExDemo = function() {
                 } else {
                     valResultsElement.text(validationResult.toString(0));
                 }
+
+                function generatorInterface (gen, mediaType) {
+                    if (iface.validator.handlers[gen].text) {
+                        var win = gen+'window';
+                        var divId = gen+'Div';
+                        var useId = 'Use'+gen+'Button';
+                        var stopId = 'Stop'+gen+'Button';
+                        
+                        var link = "data:"+mediaType+";charset=utf-8;base64,"
+                            + Base64.encode(iface.validator.handlers[gen].text);
+                        //$("#validation-messages").append($('<div><a href="' + link +'">'+gen+' output</a></div>')
+                        var options = 'width='+(window.innerWidth/3)
+                            +' , height='+(window.innerHeight/3);
+                        var openFunc = function () {
+                            return iface[win] = window.open(link , gen, options);
+                        }
+                        $("#validation-messages").append("<div id=\""+divId+"\"/>")
+                        var addUseButton = function (next, self) {
+                            $("#"+divId+"").empty().append($('<div>View '+gen+' output as <button id="'+useId+'" href="#" >popup</button> or <a style="background-color: buttonface;" href="'
+                                                             + link
+                                                             +'">link</a>.</div>'));
+                            $('#'+useId+'').click(function () {
+                                openFunc();
+                                next(self, next);
+                            });
+                        };
+                        var delStopButton = function (next, self) {
+                            $("#"+divId+"").empty().append($('<div><button id="'+stopId+'" href="#" >Stop updating '+gen+' popup</button>.</div>'));
+                            $('#'+stopId+'').click(function () {
+                                // iface[win].document.close();
+                                iface[win] = undefined;
+                                next(self, next);
+                            });
+                        };
+                        if (!iface[win] || !openFunc()) {
+                            addUseButton(delStopButton, addUseButton);
+                        } else {
+                            delStopButton(addUseButton, delStopButton);
+                        }
+                        iface.validator.handlers[gen].text = null;
+                    }
+                };
+                generatorInterface('GenX', 'application/xml');
+                generatorInterface('GenJ', 'application/json');
             } catch (e) {
                 $("#validation-messages").attr("class", "message error").text(e);
             }
@@ -650,10 +770,11 @@ ShExDemo = function() {
 
         enablePre: function() {
             $("#data").each(function(el) {
-                $(this).find("pre").get(0).innerText = $(this).find("textarea").val();
+                //$(this).find("pre").get(0).innerText = $(this).find("textarea").val();
+                $(this).find("pre").text($(this).find("textarea").val());
                 var width = $(this).width();
-                $(this).find("textarea").hide().removeClass("textInput");
-                $(this).find("pre").addClass("textInput").show();
+                $(this).find("textarea").css("display", "none").removeClass("textInput");
+                $(this).find("pre").addClass("textInput").css("display", "block");
                 $(this).width(width);
                 $(this).find(".editparent").contentEditable().change(iface.handleSchemaUpdate);
             });
@@ -665,18 +786,25 @@ ShExDemo = function() {
 
         enableTextarea: function() {
             $("#data").each(function(el) {
-                $(this).find("textarea").val($(this).find("pre").get(0).innerText);
-                $(this).find("pre").hide().removeClass("textInput");
-                $(this).find("textarea").addClass("textInput").show();
+                //$(this).find("textarea").val($(this).find("pre").get(0).innerText);
+                $(this).find("textarea").val($(this).find("pre").get(0).text());
+                $(this).find("pre").css("display", "none").removeClass("textInput");
+                $(this).find("textarea").addClass("textInput").css("display", "block");
             });
         },
 
-        layoutPanels: function() {
+        handleResize: function(ev) {
             if ($("#ctl-colorize").is(":checked")) // brutal hack
                 iface.enableTextarea();
-            $("#data .textInput").height(($("#data .textInput").parent().parent().innerHeight()/2) + "px");
+            iface.layoutPanels();
             if ($("#ctl-colorize").is(":checked"))
                 iface.enablePre();
+        },
+
+        layoutPanels: function(ev) {
+            var panelHeightPx = $("#main").innerHeight()/2 + "px";
+            //$("#schema .textInput").height(panelHeightPx);
+            $("#data .textInput").height(panelHeightPx);
         }
 
     };
