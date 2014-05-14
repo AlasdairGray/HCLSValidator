@@ -11,9 +11,9 @@ PREFIX sd: <http://www.w3.org/ns/sparql-service-description#>
 PREFIX void: <http://rdfs.org/ns/void#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
-start = <EntryLevelShape>
+start = <SummaryLevelShape>
 
-<EntryLevelShape> {
+<SummaryLevelShape> {
     rdf:type (dctypes:Dataset),
     dct:title xsd:string,  ### should be rdf:langString 
     dct:description xsd:string, ### should be rdf:langString 
