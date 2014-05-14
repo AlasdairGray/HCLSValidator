@@ -3,6 +3,7 @@ PREFIX dct: <http://purl.org/dc/terms/>
 PREFIX dctypes: <http://purl.org/dc/dcmitype/>
 PREFIX foaf: <http://foaf.example/#>
 PREFIX freq: <http://purl.org/cld/freq/>
+PREFIX idot: <http://identifiers.org/idot/>
 PREFIX lexvo: <http://lexvo.org/id/iso639-3/>
 PREFIX pav: <http://purl.org/pav/>
 PREFIX prov: <http://www.w3.org/ns/prov#>
@@ -62,7 +63,7 @@ start = <SummaryLevelShape>
 ###negate sd:namedGraph .,
 ###negate void:propertyPartition .,
 ###negate void:classPartition .,
-###negate void:subset .,
+###negate void:subset .
 }
 
 <VersionLevelShape> {
@@ -109,7 +110,7 @@ start = <SummaryLevelShape>
 ###negate sd:namedGraph .,
 ###negate void:propertyPartition .,
 ###negate void:classPartition .,
-###negate void:subset .,
+###negate void:subset .
 }
 
 <DistributionLevelShape> {
@@ -123,12 +124,33 @@ start = <SummaryLevelShape>
     	dct:creator xsd:string*),
     dct:publisher IRI,
     (foaf:page IRI)?,
+    (schemaorg:logo IRI)?,
     dct:license IRI,
-    ###dct:language lexvo:~*,
+    ###(dct:language lexvo:~)*,
+    dct:conformsTo IRI,
+###negate dct:hasPart .,
+	(idot:exampleIdentifier xsd:string)?,
+	(void:exampleResource IRI)?,   
     pav:version xsd:string?,
+###negate dct:isVersionOf .,
     pav:previousVersion @<DistributionLevelShape>?,
+###negate pav:hasCurrentVersion .,
+	dct:source IRI?,
+	pav:retrievedFrom IRI?,
+	prov:wasDerivedFrom IRI?,
+###negate dct:accrualPeriodicity .,
     (dct:format IRI? | dct:format xsd:string?),
+###negate dcat:distribution .,
     dcat:downloadURL IRI?
+###negate void:triples .,
+###negate void:entities .,
+###negate void:distinctSubjects .,
+###negate void:properties .,
+###negate void:distinctObjects .,
+###negate sd:namedGraph .,
+###negate void:propertyPartition .,
+###negate void:classPartition .,
+###negate void:subset .
 }
 
 <RDFDistributionLevelShape> {
@@ -142,29 +164,31 @@ start = <SummaryLevelShape>
     	dct:creator xsd:string*),
     dct:publisher IRI,
     (foaf:page IRI)?,
+    (schemaorg:logo IRI)?,
     dct:license IRI,
-    ###dct:language lexvo:~*,
+    ###(dct:language lexvo:~)*,
     void:vocabulary IRI*,
+    dct:conformsTo IRI,
+###negate dct:hasPart .,
+	(idot:exampleIdentifier xsd:string)?,
+	(void:exampleResource IRI)?,
+	void:inDataset IRI,   
     pav:version xsd:string,
+###negate dct:isVersionOf .,
     pav:previousVersion @<RDFDistributionLevelShape>?,
+###negate pav:hasCurrentVersion .,
+	dct:source IRI?,
+	pav:retrievedFrom IRI?,
+	prov:wasDerivedFrom IRI?,
+###negate dct:accrualPeriodicity .,			
     dct:format ("text/turtle" "application/rdf+xml" "text/plain" "text/rdf+n3"),
+###negate dcat:distribution .,
     void:dataDump IRI*,
     void:triples xsd:integer?,
     void:entities xsd:integer?,
     void:distinctSubjects xsd:integer?,
     void:properties xsd:integer?,
     void:distinctObjects xsd:integer?,
-    sd:namedGraph IRI?,
-    void:propertyPartition @<PropertyPartitionShape>*,
-    void:classPartition @<ClassPartitionShape>*
+    sd:namedGraph sd:NamedGraph?
 }
 
-<PropertyPartitionShape> {
-	void:property IRI,
-	void:triples xsd:integer
-}
-
-<ClassPartitionShape> {
-	void:class IRI,
-	void:entities xsd:integer
-}
