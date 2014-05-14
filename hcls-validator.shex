@@ -19,8 +19,8 @@ start = <SummaryLevelShape>
     dct:description xsd:string, ### should be rdf:langString 
     dct:publisher IRI,
     (foaf:page IRI)?,
-    dct:license IRI,
-    dct:accrualPeriodicity freq:~?
+    dct:license IRI
+    ###dct:accrualPeriodicity freq:~?
 }
 
 <VersionLevelShape> {
@@ -36,7 +36,7 @@ start = <SummaryLevelShape>
     dct:publisher IRI,
     (foaf:page IRI)?,
     dct:license IRI,
-    dct:language lexvo:~*,
+    ###dct:language lexvo:~*,
     pav:version xsd:string?,
     pav:previousVersion @<VersionLevelShape>?,
     pav:isVersionOf @<EntryLevelShape>,
@@ -58,7 +58,7 @@ start = <SummaryLevelShape>
     dct:publisher IRI,
     (foaf:page IRI)?,
     dct:license IRI,
-    dct:language lexvo:~*,
+    ###dct:language lexvo:~*,
     pav:version xsd:string?,
     pav:previousVersion @<DistributionLevelShape>?,
     (dct:format IRI? | dct:format xsd:string?),
@@ -77,7 +77,7 @@ start = <SummaryLevelShape>
     dct:publisher IRI,
     (foaf:page IRI)?,
     dct:license IRI,
-    dct:language lexvo:~*,
+    ###dct:language lexvo:~*,
     void:vocabulary IRI*,
     pav:version xsd:string,
     pav:previousVersion @<RDFDistributionLevelShape>?,
