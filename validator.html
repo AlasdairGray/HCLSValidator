@@ -44,7 +44,7 @@
         	<h1>HCLS Dataset Description Validator</h1>
         	<ul>
         	<li><a href="hcls-validator.shex">Validator rules</a></li>
-        	<li><a href="validator.html?url=http%3A%2F%2Flocalhost%2FHCLSValidator%2Fchembl-description.ttl">ChEMBL example</a></li>
+        	<li><a href="validator.html?url=chembl-description.ttl">ChEMBL example</a></li>
 			<li>Report an <a href="https://github.com/AlasdairGray/HCLSValidator/issues">issue</a></li>
         	</ul>
             <div id="schema" style="width=100%; ">
@@ -149,9 +149,11 @@
             });
             //Read parameters from request
             var params = getQueryParams(document.location.search);
-            var url = params.url;
-            //Set textarea content to value read from URL retrieved
-            document.getElementById("rdfDescription").value=getExternalText(url);
+            if (params.url != null) {
+                //Set textarea content to value read from URL retrieved
+                var url = params.url;
+                document.getElementById("rdfDescription").value=getExternalText(url);
+            }
         </script>
         <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
