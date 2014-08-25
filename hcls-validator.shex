@@ -84,50 +84,73 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 }
 
 <VersionLevelShape> {
+#Core
     rdf:type (dctypes:Dataset),
+    !rdf:type (void:Dataset),
+    !rdf:type (dcat:Distribution),
     dct:title (@en),  ### should be rdf:langString
+    ###dct:alternative rdf:langString, is a MAY property
     dct:description (@en), ### should be rdf:langString
-    # Ensure that at least one of created or issued dates is provided
-    (dct:created xsd:dateTime, dct:issued xsd:dateTime? | dct:created xsd:dateTime?, dct:issued xsd:dateTime),
-    #This form does not work! dct:creator (IRI xsd:string)?,
-    dct:creator IRI*,
-    dct:creator xsd:string*,
+    ###TODO add test that one of created or issued is present
+    (dct:created (xsd:date  xsd:dateTime xsd:gYearMonth xsd:gYear))?, ###Not sure the syntax of the acceptable type is correct here
+    ###pav:createdOn (xsd:date  xsd:dateTime xsd:gYearMonth xsd:gYear), ###MAY property
+    ###pav:authoredOn (xsd:date  xsd:dateTime xsd:gYearMonth xsd:gYear), ###MAY property
+    ###pav:curatedOn (xsd:date  xsd:dateTime xsd:gYearMonth xsd:gYear), ###MAY property
+    dct:creator (IRI xsd:string),
+    ###dct:contributor (IRI xsd:string), ###MAY property
+    ###pav:createdBy IRI, ###MAY property
+    ###pav:authoredBy IRI, ###MAY property
+    ###pav:curatedBy IRI, ###MAY property
+    (dct:issued (xsd:date  xsd:dateTime xsd:gYearMonth xsd:gYear))?,
     dct:publisher IRI,
     (foaf:page IRI)?,
     (schemaorg:logo IRI)?,
-    dct:license IRI,
-    ###(dct:language lexvo:~*)?,
-###negate void:vocabulary .,
-###negate void:subset .,
-###negate idot:identifierPattern .,
-###negate void:uriRegexPattern .,
-###negate idot:exampleIdentifier .,
-###negate void:exampleResource .,
-###negate void:inDataset .,
+    (dct:license IRI)+ , ### License is MUST property, but mutliple allowed
+    ###dct:rights rdf:langString, ### Rights is a MAY property
+    (dct:language .)*, ###TODO define the object
+    ###dcat:theme IRI*, ### Theme is a MAY property, should match something that is a skos:Concept
+    ###dcat:keyword xsd:string, ### Keyword is a MAY property
+    !void:vocabulary .,
+    ###dct:conformsTo IRI, ###MAY property
+    ###cito:citesAsAuthority IRI, ### citation is a MAY property
+    ###dct:hasPart IRI, ###part is a MAY property, what should be the shape of the description it matches?
+    !void:subset .,
+#Identifiers
+    ###idot:preferredPrefix xsd:string, ### Preferred prefix is a MAY property
+    ###idot:alternatePrefix xsd:string, ### Alternate prefix is a MAY property
+    !idot:identifierPattern .,
+    !void:uriRegexPattern .,
+    ###idot:accessPattern xsd:string, ### Access pattern is a MAY property
+    !idot:exampleIdentifier .,
+    !void:exampleResource .,
+#Provenance and Change
+    !void:inDataset .,
     pav:version xsd:string,
-    dct:isVersionOf @<SummaryLevelShape>,
-    pav:previousVersion @<VersionLevelShape>?,
-###negate pav:hasCurrentVersion .,
-	dct:source IRI,
-    pav:retrievedFrom @<DistributionLevelShape>*,
-    ###Need to decide what level of entry derived from should point to
-    ## Could check that it matches @<VersionLevelShape>*, but this would require that the version level shape description was present
-    prov:wasDerivedFrom IRI*,
-###negate pav:createdWith .,
-###negate dct:accrualPeriodicty .,
-###negate dct:format .,
-    (dcat:distribution @<RDFDistributionLevelShape>* | dcat:distribution @<DistributionLevelShape>*)?
-###negate dcat:downloadURL .,
-###negate void:dataDump .,
-###negate void:triples .,
-###negate void:entities .,
-###negate void:distinctSubjects .,
-###negate void:properties .,
-###negate void:distinctObjects .,
-###negate sd:namedGraph .,
-###negate void:propertyPartition .,
-###negate void:classPartition .,
-###negate void:subset .
+    dct:isVersionOf IRI,
+    (pav:previousVersion IRI)?,
+    !pav:hasCurrentVersion .,
+    (dct:source IRI)+,
+    (pav:retrievedFrom IRI)+,
+    (prov:wasDerivedFrom IRI)+,
+    !pav:createdWith .,
+    !dct:accrualPeriodicity . ,  ###dct:accrualPeriodicity freq:~?,
+#Availability/Distributions
+    !dct:format .,
+    (dcat:distribution IRI)*, ###TODO restrict the shape of the IRI but could be hard to test in practice
+    ###dcat:accessURL IRI, ### is a MAY property
+    !dcat:downloadURL .,
+    !void:dataDump .,
+    ###dcat:landingPage IRI, ###MAY property
+#Statistics
+    !void:triples .,
+    !void:entities .,
+    !void:distinctSubjects .,
+    !void:properties .,
+    !void:distinctObjects .,
+    !sd:namedGraph .,
+    !void:propertyPartition .,
+    !void:classPartition .,
+    !void:subset .
 }
 
 <DistributionLevelShape> {
