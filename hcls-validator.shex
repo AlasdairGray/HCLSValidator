@@ -13,89 +13,106 @@ PREFIX sd: <http://www.w3.org/ns/sparql-service-description#>
 PREFIX void: <http://rdfs.org/ns/void#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
-start = <SummaryLevelShape>
-
 <SummaryLevelShape> {
+#Core
     rdf:type (dctypes:Dataset),
-    dct:title xsd:string,  ### should be rdf:langString 
-    dct:description xsd:string, ### should be rdf:langString 
-###negate dct:created .,
-###negate pav:createdOn .,
-###negate pav:authoredOn .,
-###negate pav:curatedOn .,
-###negate dct:creator .,
-###negate dct:contributor .,
-###negate pav:createdBy .,
-###negate pav:authoredBy .,
-###negate pav:curatedBy .,
-###negate dct:issued .,
+    !rdf:type (void:Dataset),
+    !rdf:type (dcat:Distribution),
+    dct:title (@en),  ### should be rdf:langString
+    ###dct:alternative rdf:langString, is a MAY property
+    dct:description (@en), ### should be rdf:langString
+    !dct:created .,
+    !pav:createdOn .,
+    !pav:authoredOn .,
+    !pav:curatedOn .,
+    !dct:creator .,
+    !dct:contributor .,
+    !pav:createdBy .,
+    !pav:authoredBy .,
+    !pav:curatedBy .,
+    !dct:issued .,
     dct:publisher IRI,
     (foaf:page IRI)?,
     (schemaorg:logo IRI)?,
-    dct:license IRI
-###negate dct:language .,
-###negate void:vocabulary .,
-###negate dct:conformsTo .,
-###negate void:subset .,
-###negate idot:identifierPattern .,
-###negate void:uriRegexPattern .,
-###negate idot:exampleIdentifier .,
-###negate void:exampleResource .,
-###negate void:inDataset .,
-###negate pav:version .,
-###negate dct:isVersionOf .,
-###negate pav:previousVersion .,
-###negate dct:source .,
-###negate pav:retrievedFrom .,
-###negate prov:wasDerivedFrom .,
-###negate pav:createdWith .,
-    ###dct:accrualPeriodicity freq:~?,
-###negate dct:format .,
-###negate dcat:distribution .,
-###negate dcat:downloadURL .,
-###negate void:dataDump .,
-###negate dcat:landingPage .,
-###negate void:triples .,
-###negate void:entities .,
-###negate void:distinctSubjects .,
-###negate void:properties .,
-###negate void:distinctObjects .,
-###negate sd:namedGraph .,
-###negate void:propertyPartition .,
-###negate void:classPartition .,
-###negate void:subset .
+    (dct:license IRI)* , ### License is now a MAY property
+    ###dct:rights rdf:langString, ### Rights is a MAY property
+    !dct:language .,
+    ###dcat:theme IRI*, ### Theme is a MAY property, should match something that is a skos:Concept
+    ###dcat:keyword xsd:string, ### Keyword is a MAY property
+    !void:vocabulary .,
+    !dct:conformsTo .,
+    ###cito:citesAsAuthority IRI, ### citation is a MAY property
+    ###dct:hasPart IRI, ###part is a MAY property, what should be the shape of the description it matches?
+    !void:subset .,
+#Identifiers
+    ###idot:preferredPrefix xsd:string, ### Preferred prefix is a MAY property
+    ###idot:alternatePrefix xsd:string, ### Alternate prefix is a MAY property
+    !idot:identifierPattern .,
+    !void:uriRegexPattern .,
+    ###idot:accessPattern xsd:string, ### Access pattern is a MAY property
+    !idot:exampleIdentifier .,
+    !void:exampleResource .,
+#Provenance and Change
+    !void:inDataset .,
+    !pav:version .,
+    !dct:isVersionOf .,
+    !pav:previousVersion .,
+    ###pav:hasCurrentVersion IRI, ###  is a MAY property, should this match an @VersionShape?
+    !dct:source .,
+    !pav:retrievedFrom .,
+    !prov:wasDerivedFrom .,
+    !pav:createdWith .,
+###Accrual Periodicity should match something from the freq namespace
+    dct:accrualPeriodicity . ,  ###dct:accrualPeriodicity freq:~?,
+#Availability/Distributions
+    !dct:format .,
+    !dcat:distribution .,
+    ###dcat:accessURL IRI, ### is a MAY property
+    !dcat:downloadURL .,
+    !void:dataDump .,
+    !dcat:landingPage .,
+#Statistics
+    !void:triples .,
+    !void:entities .,
+    !void:distinctSubjects .,
+    !void:properties .,
+    !void:distinctObjects .,
+    !sd:namedGraph .,
+    !void:propertyPartition .,
+    !void:classPartition .,
+    !void:subset .
 }
 
 <VersionLevelShape> {
     rdf:type (dctypes:Dataset),
-    dct:title xsd:string,  ### should be rdf:langString 
-    dct:description xsd:string, ### should be rdf:langString 
+    dct:title (@en),  ### should be rdf:langString
+    dct:description (@en), ### should be rdf:langString
     # Ensure that at least one of created or issued dates is provided
-    (dct:created xsd:dateTime, dct:issued xsd:dateTime? |
-        dct:created xsd:dateTime?, dct:issued xsd:dateTime),
+    (dct:created xsd:dateTime, dct:issued xsd:dateTime? | dct:created xsd:dateTime?, dct:issued xsd:dateTime),
     #This form does not work! dct:creator (IRI xsd:string)?,
-    (dct:creator IRI* |
-    	dct:creator xsd:string*),
+    dct:creator IRI*,
+    dct:creator xsd:string*,
     dct:publisher IRI,
     (foaf:page IRI)?,
     (schemaorg:logo IRI)?,
     dct:license IRI,
     ###(dct:language lexvo:~*)?,
 ###negate void:vocabulary .,
-###negate void:subset .,    
+###negate void:subset .,
 ###negate idot:identifierPattern .,
 ###negate void:uriRegexPattern .,
 ###negate idot:exampleIdentifier .,
 ###negate void:exampleResource .,
 ###negate void:inDataset .,
     pav:version xsd:string,
-    dct:isVersionOf @<EntryLevelShape>,
+    dct:isVersionOf @<SummaryLevelShape>,
     pav:previousVersion @<VersionLevelShape>?,
 ###negate pav:hasCurrentVersion .,
 	dct:source IRI,
     pav:retrievedFrom @<DistributionLevelShape>*,
     ###Need to decide what level of entry derived from should point to
-    prov:wasDerivedFrom @<VersionLevelShape>*,
+    ## Could check that it matches @<VersionLevelShape>*, but this would require that the version level shape description was present
+    prov:wasDerivedFrom IRI*,
 ###negate pav:createdWith .,
 ###negate dct:accrualPeriodicty .,
 ###negate dct:format .,
@@ -115,8 +132,8 @@ start = <SummaryLevelShape>
 
 <DistributionLevelShape> {
     rdf:type (dctypes:Dataset),
-    dct:title xsd:string,  ### should be rdf:langString 
-    dct:description xsd:string, ### should be rdf:langString 
+    dct:title (@en),  ### should be rdf:langString
+    dct:description (@en), ### should be rdf:langString
     # Ensure that at least one of created or issued dates is provided
     (dct:created xsd:dateTime, dct:issued xsd:dateTime? |
         dct:created xsd:dateTime?, dct:issued xsd:dateTime),
@@ -130,7 +147,7 @@ start = <SummaryLevelShape>
     dct:conformsTo IRI,
 ###negate dct:hasPart .,
 	(idot:exampleIdentifier xsd:string)?,
-	(void:exampleResource IRI)?,   
+	(void:exampleResource IRI)?,
     pav:version xsd:string?,
 ###negate dct:isVersionOf .,
     pav:previousVersion @<DistributionLevelShape>?,
@@ -155,8 +172,8 @@ start = <SummaryLevelShape>
 
 <RDFDistributionLevelShape> {
     rdf:type (void:Dataset),
-    dct:title xsd:string,  ### should be rdf:langString 
-    dct:description xsd:string, ### should be rdf:langString 
+    dct:title (@en),  ### should be rdf:langString
+    dct:description (@en), ### should be rdf:langString
     # Ensure that at least one of created or issued dates is provided
     (dct:created xsd:dateTime, dct:issued xsd:dateTime? |
         dct:created xsd:dateTime?, dct:issued xsd:dateTime),
@@ -172,7 +189,7 @@ start = <SummaryLevelShape>
 ###negate dct:hasPart .,
 	(idot:exampleIdentifier xsd:string)?,
 	(void:exampleResource IRI)?,
-	void:inDataset IRI,   
+	void:inDataset IRI,
     pav:version xsd:string,
 ###negate dct:isVersionOf .,
     pav:previousVersion @<RDFDistributionLevelShape>?,
@@ -180,7 +197,7 @@ start = <SummaryLevelShape>
 	dct:source IRI?,
 	pav:retrievedFrom IRI?,
 	prov:wasDerivedFrom IRI?,
-###negate dct:accrualPeriodicity .,			
+###negate dct:accrualPeriodicity .,
     dct:format ("text/turtle" "application/rdf+xml" "text/plain" "text/rdf+n3"),
 ###negate dcat:distribution .,
     void:dataDump IRI*,
@@ -191,4 +208,3 @@ start = <SummaryLevelShape>
     void:distinctObjects xsd:integer?,
     sd:namedGraph sd:NamedGraph?
 }
-
