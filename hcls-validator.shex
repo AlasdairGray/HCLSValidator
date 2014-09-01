@@ -105,7 +105,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     dct:publisher IRI,
     (foaf:page IRI)?,
     (schemaorg:logo IRI)?,
-    (dct:license IRI)+ , ### License is MUST property, but mutliple allowed
+    (dct:license IRI)+ , ### License is MUST property, but multiple allowed
     ###dct:rights rdf:langString, ### Rights is a MAY property
     (dct:language .)*, ###TODO define the object
     ###dcat:theme IRI*, ### Theme is a MAY property, should match something that is a skos:Concept
@@ -176,7 +176,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     dct:publisher IRI,
     (foaf:page IRI)?,
     (schemaorg:logo IRI)?,
-    (dct:license IRI)+ , ### License is MUST property, but mutliple allowed
+    (dct:license IRI)+ , ### License is MUST property, but multiple allowed
     ###dct:rights rdf:langString, ### Rights is a MAY property
     (dct:language .)*, ###TODO define the object
     ###dcat:theme IRI*, ### Theme is a MAY property, should match something that is a skos:Concept
