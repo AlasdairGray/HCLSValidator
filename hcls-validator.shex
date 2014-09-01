@@ -271,7 +271,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     (idot:exampleIdentifier xsd:string)*,
     (void:exampleResource IRI)*,
 #Provenance and Change
-    (void:inDataset IRI)? ., ### Not for a non-RDF dataset
+    (void:inDataset IRI)? , ### Not for a non-RDF dataset
     (pav:version xsd:string)?,
     !dct:isVersionOf .,
     (pav:previousVersion IRI)?,
@@ -294,10 +294,10 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     (void:distinctSubjects xsd:integer)?,
     (void:properties xsd:integer)?,
     (void:distinctObjects xsd:integer)?,
-    (sd:namedGraph @NamedGraphShape)?, ###TODO Correct when issue 82 clarified
-    ###void:propertyPartition @PropertyPartitionShape, ### MAY property
-    ###void:classPartition @ClassPartitionShape, ### MAY property
-    ###void:subset @SubsetPartitionShape ### MAY property
+    (sd:namedGraph @<NamedGraphShape>)? ###TODO Correct when issue 82 clarified
+    ###void:propertyPartition @<PropertyPartitionShape>, ### MAY property
+    ###void:classPartition @<ClassPartitionShape>, ### MAY property
+    ###void:subset @<SubsetPartitionShape> ### MAY property
 }
 
 <NamedGraphShape> {
