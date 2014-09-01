@@ -13,75 +13,81 @@ PREFIX sd: <http://www.w3.org/ns/sparql-service-description#>
 PREFIX void: <http://rdfs.org/ns/void#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
-<SummaryLevelShape> {
+###NOTE: negated statements commented out with #! and replaced with an alternative expression for use with closed shapes
+
+<SummaryLevelShape> [
 #Core
     rdf:type (dctypes:Dataset),
-    !rdf:type (void:Dataset),
-    !rdf:type (dcat:Distribution),
+    #!rdf:type (void:Dataset),
+    #!rdf:type (dcat:Distribution),
+    ###Following statement used to disallow void:Dataset and dcat:Distribution
+    rdf:type (- void:Dataset dcat:Distribution)*,
     dct:title (@en),  ### should be rdf:langString
     ###dct:alternative rdf:langString, is a MAY property
     dct:description (@en), ### should be rdf:langString
-    !dct:created .,
-    !pav:createdOn .,
-    !pav:authoredOn .,
-    !pav:curatedOn .,
-    !dct:creator .,
-    !dct:contributor .,
-    !pav:createdBy .,
-    !pav:authoredBy .,
-    !pav:curatedBy .,
-    !dct:issued .,
+    #!dct:created .,
+    #!pav:createdOn .,
+    #!pav:authoredOn .,
+    #!pav:curatedOn .,
+    #!dct:creator .,
+    #!dct:contributor .,
+    #!pav:createdBy .,
+    #!pav:authoredBy .,
+    #!pav:curatedBy .,
+    #!dct:issued .,
     dct:publisher IRI,
     (foaf:page IRI)?,
     (schemaorg:logo IRI)?,
     (dct:license IRI)* , ### License is now a MAY property
     ###dct:rights rdf:langString, ### Rights is a MAY property
-    !dct:language .,
+    #!dct:language .,
     ###dcat:theme IRI*, ### Theme is a MAY property, should match something that is a skos:Concept
     ###dcat:keyword xsd:string, ### Keyword is a MAY property
-    !void:vocabulary .,
-    !dct:conformsTo .,
+    #!void:vocabulary .,
+    #!dct:conformsTo .,
     ###cito:citesAsAuthority IRI, ### citation is a MAY property
     ###dct:hasPart IRI, ###part is a MAY property, what should be the shape of the description it matches?
-    !void:subset .,
+    #!void:subset .,
 #Identifiers
     ###idot:preferredPrefix xsd:string, ### Preferred prefix is a MAY property
     ###idot:alternatePrefix xsd:string, ### Alternate prefix is a MAY property
-    !idot:identifierPattern .,
-    !void:uriRegexPattern .,
+    #!idot:identifierPattern .,
+    #!void:uriRegexPattern .,
     ###idot:accessPattern xsd:string, ### Access pattern is a MAY property
-    !idot:exampleIdentifier .,
-    !void:exampleResource .,
+    #!idot:exampleIdentifier .,
+    #!void:exampleResource .,
 #Provenance and Change
-    !void:inDataset .,
-    !pav:version .,
-    !dct:isVersionOf .,
-    !pav:previousVersion .,
+    #!void:inDataset .,
+    #!pav:version .,
+    #!dct:isVersionOf .,
+    #!pav:previousVersion .,
     ###pav:hasCurrentVersion IRI, ###  is a MAY property, should this match an @VersionShape?
-    !dct:source .,
-    !pav:retrievedFrom .,
-    !prov:wasDerivedFrom .,
-    !pav:createdWith .,
+    #!dct:source .,
+    #!pav:retrievedFrom .,
+    #!prov:wasDerivedFrom .,
+    #!pav:createdWith .,
 ###Accrual Periodicity should match something from the freq namespace
     dct:accrualPeriodicity . ,  ###TODO dct:accrualPeriodicity freq:~?,
 #Availability/Distributions
-    !dct:format .,
-    !dcat:distribution .,
+    #!dct:format .,
+    #!dcat:distribution .,
     ###dcat:accessURL IRI, ### is a MAY property
-    !dcat:downloadURL .,
-    !void:dataDump .,
-    !dcat:landingPage .,
+    #!dcat:downloadURL .,
+    #!void:dataDump .,
+    #!dcat:landingPage .,
 #Statistics
-    !void:triples .,
-    !void:entities .,
-    !void:distinctSubjects .,
-    !void:properties .,
-    !void:distinctObjects .,
-    !sd:namedGraph .,
-    !void:propertyPartition .,
-    !void:classPartition .,
-    !void:subset .
-}
+    #!void:triples .,
+    #!void:entities .,
+    #!void:distinctSubjects .,
+    #!void:properties .,
+    #!void:distinctObjects .,
+    #!sd:namedGraph .,
+    #!void:propertyPartition .,
+    #!void:classPartition .,
+    #!void:subset .
+    ###Following statement is used in closed shapes to negate properties
+    - rdf:type - dct:created - pav:createdOn - pav:authoredOn - pav:curatedOn - dct:creator - dct:contributor - pav:createdBy - pav:authoredBy - pav:curatedBy - dct:issued - dct:language - void:vocabulary - dct:conformsTo - void:subset - idot:identifierPattern - void:uriRegexPattern - idot:exampleIdentifier - void:exampleResource - void:inDataset - pav:version - dct:isVersionOf - pav:previousVersion - dct:source - pav:retrievedFrom - prov:wasDerivedFrom - pav:createdWith - dct:format - dcat:distribution - dcat:downloadURL - void:dataDump - dcat:landingPage - void:triples - void:entities - void:distinctSubjects - void:properties - void:distinctObjects - sd:namedGraph - void:propertyPartition - void:classPartition - void:subset . *
+]
 
 <VersionLevelShape> {
 #Core
