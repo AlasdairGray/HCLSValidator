@@ -63,7 +63,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     !prov:wasDerivedFrom .,
     !pav:createdWith .,
 ###Accrual Periodicity should match something from the freq namespace
-    dct:accrualPeriodicity . ,  ###dct:accrualPeriodicity freq:~?,
+    dct:accrualPeriodicity . ,  ###TODO dct:accrualPeriodicity freq:~?,
 #Availability/Distributions
     !dct:format .,
     !dcat:distribution .,
@@ -133,7 +133,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     (pav:retrievedFrom IRI)+,
     (prov:wasDerivedFrom IRI)+,
     !pav:createdWith .,
-    !dct:accrualPeriodicity . ,  ###dct:accrualPeriodicity freq:~?,
+    !dct:accrualPeriodicity . ,
 #Availability/Distributions
     !dct:format .,
     (dcat:distribution IRI)*, ###TODO restrict the shape of the IRI but could be hard to test in practice
