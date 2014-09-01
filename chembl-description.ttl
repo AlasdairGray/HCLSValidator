@@ -23,19 +23,32 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     dct:accrualPeriodicity freq:quarterly
 .
 
+###Minimal match, i.e. only MUST properties
+<chembl17>
+    rdf:type dctypes:Dataset ;
+    dct:title "ChEMBL"@en ;
+    dct:description "ChEMBL is a database of bioactive drug-like small molecules, it contains 2-D structures, calculated properties (e.g. logP, Molecular Weight, Lipinski Parameters, etc.) and abstracted bioactivities (e.g. binding constants, pharmacology and ADMET data). The data is abstracted and curated from the primary scientific literature, and cover a significant fraction of the SAR and discovery of modern drugs. We attempt to normalise the bioactivities into a uniform set of end-points and units where possible, and also to tag the links between a molecular target and a published assay with a set of varying confidence levels. Additional data on clinical progress of compounds is being integrated into ChEMBL at the current time."@en ;
+    dct:creator <http://www.ebi.ac.uk> ;
+    dct:publisher <http://www.ebi.ac.uk/> ;
+    dct:license <http://creativecommons.org/licenses/by-sa/3.0/> ;
+    pav:version "17";
+    dct:isVersionOf <chembl>
+.
+
 <chembl16>
     rdf:type dctypes:Dataset ;
     dct:title "ChEMBL"@en ;
     dct:description "ChEMBL is a database of bioactive drug-like small molecules, it contains 2-D structures, calculated properties (e.g. logP, Molecular Weight, Lipinski Parameters, etc.) and abstracted bioactivities (e.g. binding constants, pharmacology and ADMET data). The data is abstracted and curated from the primary scientific literature, and cover a significant fraction of the SAR and discovery of modern drugs. We attempt to normalise the bioactivities into a uniform set of end-points and units where possible, and also to tag the links between a molecular target and a published assay with a set of varying confidence levels. Additional data on clinical progress of compounds is being integrated into ChEMBL at the current time."@en ;
-    dct:created "2013-08-29T00:00:00"^^xsd:dateTime ;
+    dct:created "2013-08-29"^^xsd:date ;
+    dct:creator <http://www.ebi.ac.uk> ;
     foaf:page <https://www.ebi.ac.uk/chembl> ;
     dct:publisher <http://www.ebi.ac.uk/> ;
     dct:license <http://creativecommons.org/licenses/by-sa/3.0/> ;
     dct:language lexvo:en;
     pav:version "16";
     pav:previousVersion <chembl15>;
-    pav:isVersionOf <chembl>;
-    prov:derivedFrom <example>;
+    dct:isVersionOf <chembl>;
+    prov:wasDerivedFrom <example>;
     dcat:distribution <chembl16rdf>, <chembl16db> ;
 .
 
@@ -43,7 +56,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 	a void:Dataset ;
 	dct:title "ChEMBL RDF"@en ;
 	dct:description "The RDF distribution of the ChEMBL 16 dataset."@en ;
-	dct:created "2013-05-07T00:00:00.000+01:00"^^xsd:dateTime ;
+	dct:created "2013-05-07"^^xsd:date ;
 	dct:creator <http://orcid.org/0000-0002-8011-0300> ;
 	dct:publisher <http://www.ebi.ac.uk/>;
     foaf:page <https://www.ebi.ac.uk/chembl> ;
@@ -61,7 +74,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 	a dctypes:Dataset;
 	dct:title "ChEMBL RDF"@en ;
 	dct:description "The RDF distribution of the ChEMBL 16 dataset."@en ;
-	dct:created "2013-05-07T00:00:00.000+01:00"^^xsd:dateTime ;
+	dct:created "2013-05-07"^^xsd:date ;
 	dct:publisher <http://www.ebi.ac.uk/>;
     foaf:page <https://www.ebi.ac.uk/chembl> ;
 	dct:license <http://creativecommons.org/licenses/by-sa/3.0/> ;
@@ -71,11 +84,12 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     rdf:type dctypes:Dataset ;
     dct:title "ChEMBL"@en ;
     dct:description "ChEMBL is a database of bioactive drug-like small molecules, it contains 2-D structures, calculated properties (e.g. logP, Molecular Weight, Lipinski Parameters, etc.) and abstracted bioactivities (e.g. binding constants, pharmacology and ADMET data). The data is abstracted and curated from the primary scientific literature, and cover a significant fraction of the SAR and discovery of modern drugs. We attempt to normalise the bioactivities into a uniform set of end-points and units where possible, and also to tag the links between a molecular target and a published assay with a set of varying confidence levels. Additional data on clinical progress of compounds is being integrated into ChEMBL at the current time."@en ;
-    dct:created "2013-05-07T00:00:00"^^xsd:dateTime ;
+    dct:created "2013-05-07"^^xsd:date ;
+    dct:creator <http://www.ebi.ac.uk> ;
     dct:publisher <http://www.ebi.ac.uk/> ;
     dct:license <http://creativecommons.org/licenses/by-sa/3.0/> ;
     dct:language lexvo:en, lexvo:fr;
     pav:version "15";
-    pav:isVersionOf <chembl>;
+    dct:isVersionOf <chembl>;
     prov:derivedFrom <example>
 .
