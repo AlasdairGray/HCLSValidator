@@ -52,32 +52,24 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     dcat:distribution <chembl16rdf>, <chembl16db> ;
 .
 
-<chembl16rdf>
-	a void:Dataset ;
+<chembl16rdf-min>
+	a void:Dataset, dcat:Distribution ;
 	dct:title "ChEMBL RDF"@en ;
 	dct:description "The RDF distribution of the ChEMBL 16 dataset."@en ;
-	dct:created "2013-05-07"^^xsd:date ;
 	dct:creator <http://orcid.org/0000-0002-8011-0300> ;
 	dct:publisher <http://www.ebi.ac.uk/>;
-    foaf:page <https://www.ebi.ac.uk/chembl> ;
 	dct:license <http://creativecommons.org/licenses/by-sa/3.0/> ;
-	pav:version "16.0";
-	void:vocabulary <http://purl.org/ontology/bibo/> , <http://www.bioassayontology.org/bao#> , <http://purl.org/obo/owl/CHEBI#> , <http://rdf.ebi.ac.uk/resource/chembl/> , <http://semanticscience.org/resource/> , <http://purl.org/spar/cito/> , <http://purl.org/dc/terms/> , <http://www.w3.org/2002/07/owl#> , <http://purl.obolibrary.org/obo/> , <http://www.w3.org/1999/02/22-rdf-syntax-ns#> , <http://www.w3.org/2000/01/rdf-schema#> , <http://www.w3.org/2004/02/skos/core#> , <http://www.w3.org/2001/XMLSchema#> ;
-    void:exampleResource <http://rdf.ebi.ac.uk/resource/chembl/molecule/CHEMBL941/> ;
-    void:sparqlEndpoint <http://rdf.ebi.ac.uk/dataset/chembl/sparql> ;
-    dct:format "text/turtle";
-    void:dataDump <ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBL-RDF/16/chembl_16_molecule.ttl.gz> ;
-    void:triples "82003819"^^xsd:integer
+  dct:format "text/turtle";
 .
 
-<chembl16db>
-	a dctypes:Dataset;
-	dct:title "ChEMBL RDF"@en ;
-	dct:description "The RDF distribution of the ChEMBL 16 dataset."@en ;
-	dct:created "2013-05-07"^^xsd:date ;
+<chembl16db-min>
+	a dcat:Distribution;
+	dct:title "ChEMBL DB Dump"@en ;
+	dct:description "A relational data dump of the ChEMBL 16 dataset."@en ;
+  dct:creator <http://www.ebi.ac.uk/>;
 	dct:publisher <http://www.ebi.ac.uk/>;
-    foaf:page <https://www.ebi.ac.uk/chembl> ;
 	dct:license <http://creativecommons.org/licenses/by-sa/3.0/> ;
+  dct:format "text/application"
 .
 
 <chembl15>
