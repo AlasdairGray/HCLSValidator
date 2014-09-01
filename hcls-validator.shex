@@ -185,7 +185,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     (dct:conformsTo IRI)?,
     ###cito:citesAsAuthority IRI, ### citation is a MAY property
     !dct:hasPart .,
-    !void:subset .,
+    !void:subset ., ### Not for a non-RDF dataset
 #Identifiers
     ###idot:preferredPrefix xsd:string, ### Preferred prefix is a MAY property
     ###idot:alternatePrefix xsd:string, ### Alternate prefix is a MAY property
@@ -206,10 +206,10 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     ###pav:createdWith IRI, ### MAY property
     !dct:accrualPeriodicity . ,
 #Availability/Distributions
-    dct:format (IRI xsd:string), 
+    dct:format (IRI xsd:string),
     !dcat:distribution .,
     ###dcat:accessURL IRI, ### is a MAY property
-    (dcat:downloadURL IRI),
+    (dcat:downloadURL IRI)?,
     !void:dataDump .,  ### Not for a non-RDF dataset
     ###dcat:landingPage IRI, ###MAY property
 #Statistics
