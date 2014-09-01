@@ -237,21 +237,21 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     - rdf:type - void:vocabulary - void:subset - dct:hasPart - void:uriRegexPattern - void:exampleResource - void:inDataset - dct:isVersionOf - pav:hasCurrentVersion - dct:accrualPeriodicity - dcat:distribution - void:dataDump - void:triples - void:entities - void:distinctSubjects - void:properties - void:distinctObjects - sd:namedGraph - void:propertyPartition - void:classPartition - void:subset . *
 ]
 
-<RDFDistributionLevelShape> {
+<RDFDistributionLevelShape> [
 #Core
-    (rdf:type (dctypes:Dataset))?,
     rdf:type (void:Dataset),
     rdf:type (dcat:Distribution),
+    ###Free to match any other rdf:type statements
     dct:title (@en),  ### should be rdf:langString
     ###dct:alternative rdf:langString, is a MAY property
     dct:description (@en), ### should be rdf:langString
     ###TODO add test that one of created or issued is present
     (dct:created xsd:date | dct:created  xsd:dateTime | dct:created xsd:gYearMonth | dct:created xsd:gYear)?,
-    ###pav:createdOn xsd:date | pav:createdOn xsd:dateTime | pav:createdOn xsd:gYearMonth | pav:createdOn xsd:gYear, ###MAY property
-    ###pav:authoredOn xsd:date | pav:authoredOn xsd:dateTime | pav:authoredOn xsd:gYearMonth | pav:authoredOn xsd:gYear, ###MAY property
-    ###pav:curatedOn xsd:date | pav:curatedOn xsd:dateTime | pav:curatedOn xsd:gYearMonth | pav:curatedOn xsd:gYear, ###MAY property
-    dct:creator IRI | dct:creator xsd:string,
-    ###dct:contributor IRI | dct:contributor xsd:string, ###MAY property
+    ###(pav:createdOn xsd:date | pav:createdOn xsd:dateTime | pav:createdOn xsd:gYearMonth | pav:createdOn xsd:gYear), ###MAY property
+    ###(pav:authoredOn xsd:date | pav:authoredOn xsd:dateTime | pav:authoredOn xsd:gYearMonth | pav:authoredOn xsd:gYear), ###MAY property
+    ###(pav:curatedOn xsd:date | pav:curatedOn xsd:dateTime | pav:curatedOn xsd:gYearMonth | pav:curatedOn xsd:gYear), ###MAY property
+    (dct:creator IRI | dct:creator xsd:string),
+    ###(dct:contributor IRI | dct:contributor xsd:string), ###MAY property
     ###pav:createdBy IRI, ###MAY property
     ###pav:authoredBy IRI, ###MAY property
     ###pav:curatedBy IRI, ###MAY property
@@ -263,12 +263,12 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     ###dct:rights rdf:langString, ### Rights is a MAY property
     (dct:language .)*, ###TODO define the object
     ###dcat:theme IRI*, ### Theme is a MAY property, should match something that is a skos:Concept
-    ###dcat:keyword xsd:string, ### Keyword is a MAY property
-    !void:vocabulary .,
+    ###dcat:keyword xsd:string*, ### Keyword is a MAY property
+    void:vocabulary IRI*,
     (dct:conformsTo IRI)?,
     ###cito:citesAsAuthority IRI, ### citation is a MAY property
-    !dct:hasPart .,
-    void:subset .,
+    #!dct:hasPart .,
+    (void:subset .)*,
 #Identifiers
     ###idot:preferredPrefix xsd:string, ### Preferred prefix is a MAY property
     ###idot:alternatePrefix xsd:string, ### Alternate prefix is a MAY property
@@ -278,22 +278,22 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     (idot:exampleIdentifier xsd:string)*,
     (void:exampleResource IRI)*,
 #Provenance and Change
-    (void:inDataset IRI)? , ### Not for a non-RDF dataset
+    (void:inDataset IRI)? ,
     (pav:version xsd:string)?,
-    !dct:isVersionOf .,
+    #!dct:isVersionOf .,
     (pav:previousVersion IRI)?,
-    !pav:hasCurrentVersion .,
-    (dct:source IRI)+,
-    (pav:retrievedFrom IRI)+,
-    (prov:wasDerivedFrom IRI)+,
+    #!pav:hasCurrentVersion .,
+    (dct:source IRI)*,
+    (pav:retrievedFrom IRI)*,
+    (prov:wasDerivedFrom IRI)*,
     ###pav:createdWith IRI, ### MAY property
-    !dct:accrualPeriodicity . ,
+    #!dct:accrualPeriodicity . ,
 #Availability/Distributions
-    dct:format IRI | dct:format xsd:string,
-    !dcat:distribution .,
+    (dct:format IRI | dct:format xsd:string),
+    #!dcat:distribution .,
     ###dcat:accessURL IRI, ### is a MAY property
-    (dcat:downloadURL IRI)?,
-    (void:dataDump IRI)?,
+    (dcat:downloadURL IRI)*,
+    (void:dataDump IRI)*,
     ###dcat:landingPage IRI, ###MAY property
 #Statistics
     (void:triples xsd:integer)?,
@@ -301,11 +301,13 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     (void:distinctSubjects xsd:integer)?,
     (void:properties xsd:integer)?,
     (void:distinctObjects xsd:integer)?,
-    (sd:namedGraph @<NamedGraphShape>)? ###TODO Correct when issue 82 clarified
+    (sd:namedGraph @<NamedGraphShape>)?, ###TODO Correct when issue 82 clarified
     ###void:propertyPartition @<PropertyPartitionShape>, ### MAY property
     ###void:classPartition @<ClassPartitionShape>, ### MAY property
     ###void:subset @<SubsetPartitionShape> ### MAY property
-}
+    - dct:hasPart - dct:isVersionOf - pav:hasCurrentVersion - dct:accrualPeriodicity - dcat:distribution . *
+]
+
 
 <NamedGraphShape> {
   rdf:type sd:NamedGraph
