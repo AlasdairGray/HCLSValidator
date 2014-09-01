@@ -154,43 +154,74 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 }
 
 <DistributionLevelShape> {
-    rdf:type (dctypes:Dataset),
+#Core
+    (rdf:type (dctypes:Dataset))?,
+    ###RDF datasets are being validated separately
+    !rdf:type (void:Dataset),
+    rdf:type (dcat:Distribution),
     dct:title (@en),  ### should be rdf:langString
+    ###dct:alternative rdf:langString, is a MAY property
     dct:description (@en), ### should be rdf:langString
-    # Ensure that at least one of created or issued dates is provided
-    (dct:created xsd:dateTime, dct:issued xsd:dateTime? |
-        dct:created xsd:dateTime?, dct:issued xsd:dateTime),
-    (dct:creator IRI* |
-    	dct:creator xsd:string*),
+    ###TODO add test that one of created or issued is present
+    (dct:created (xsd:date  xsd:dateTime xsd:gYearMonth xsd:gYear))?, ###Not sure the syntax of the acceptable type is correct here
+    ###pav:createdOn (xsd:date  xsd:dateTime xsd:gYearMonth xsd:gYear), ###MAY property
+    ###pav:authoredOn (xsd:date  xsd:dateTime xsd:gYearMonth xsd:gYear), ###MAY property
+    ###pav:curatedOn (xsd:date  xsd:dateTime xsd:gYearMonth xsd:gYear), ###MAY property
+    dct:creator (IRI xsd:string),
+    ###dct:contributor (IRI xsd:string), ###MAY property
+    ###pav:createdBy IRI, ###MAY property
+    ###pav:authoredBy IRI, ###MAY property
+    ###pav:curatedBy IRI, ###MAY property
+    (dct:issued (xsd:date  xsd:dateTime xsd:gYearMonth xsd:gYear))?,
     dct:publisher IRI,
     (foaf:page IRI)?,
     (schemaorg:logo IRI)?,
-    dct:license IRI,
-    ###(dct:language lexvo:~)*,
-    dct:conformsTo IRI,
-###negate dct:hasPart .,
-	(idot:exampleIdentifier xsd:string)?,
-	(void:exampleResource IRI)?,
-    pav:version xsd:string?,
-###negate dct:isVersionOf .,
-    pav:previousVersion @<DistributionLevelShape>?,
-###negate pav:hasCurrentVersion .,
-	dct:source IRI?,
-	pav:retrievedFrom IRI?,
-	prov:wasDerivedFrom IRI?,
-###negate dct:accrualPeriodicity .,
-    (dct:format IRI? | dct:format xsd:string?),
-###negate dcat:distribution .,
-    dcat:downloadURL IRI?
-###negate void:triples .,
-###negate void:entities .,
-###negate void:distinctSubjects .,
-###negate void:properties .,
-###negate void:distinctObjects .,
-###negate sd:namedGraph .,
-###negate void:propertyPartition .,
-###negate void:classPartition .,
-###negate void:subset .
+    (dct:license IRI)+ , ### License is MUST property, but mutliple allowed
+    ###dct:rights rdf:langString, ### Rights is a MAY property
+    (dct:language .)*, ###TODO define the object
+    ###dcat:theme IRI*, ### Theme is a MAY property, should match something that is a skos:Concept
+    ###dcat:keyword xsd:string, ### Keyword is a MAY property
+    !void:vocabulary .,
+    (dct:conformsTo IRI)?,
+    ###cito:citesAsAuthority IRI, ### citation is a MAY property
+    !dct:hasPart .,
+    !void:subset .,
+#Identifiers
+    ###idot:preferredPrefix xsd:string, ### Preferred prefix is a MAY property
+    ###idot:alternatePrefix xsd:string, ### Alternate prefix is a MAY property
+    ###idot:identifierPattern xsd:string, ###MAY property
+    !void:uriRegexPattern ., ### Not for an non-RDF dataset
+    ###idot:accessPattern xsd:string, ### Access pattern is a MAY property
+    (idot:exampleIdentifier xsd:string)*,
+    !void:exampleResource ., ### Not for an non-RDF dataset
+#Provenance and Change
+    !void:inDataset ., ### Not for a non-RDF dataset
+    (pav:version xsd:string)?,
+    !dct:isVersionOf .,
+    (pav:previousVersion IRI)?,
+    !pav:hasCurrentVersion .,
+    (dct:source IRI)+,
+    (pav:retrievedFrom IRI)+,
+    (prov:wasDerivedFrom IRI)+,
+    ###pav:createdWith IRI, ### MAY property
+    !dct:accrualPeriodicity . ,
+#Availability/Distributions
+    dct:format (IRI xsd:string), 
+    !dcat:distribution .,
+    ###dcat:accessURL IRI, ### is a MAY property
+    (dcat:downloadURL IRI),
+    !void:dataDump .,  ### Not for a non-RDF dataset
+    ###dcat:landingPage IRI, ###MAY property
+#Statistics
+    !void:triples .,  ### Not for a non-RDF dataset
+    !void:entities ., ### Not for a non-RDF dataset
+    !void:distinctSubjects ., ### Not for a non-RDF dataset
+    !void:properties ., ### Not for a non-RDF dataset
+    !void:distinctObjects ., ### Not for a non-RDF dataset
+    !sd:namedGraph ., ### Not for a non-RDF dataset
+    !void:propertyPartition ., ### Not for a non-RDF dataset
+    !void:classPartition ., ### Not for a non-RDF dataset
+    !void:subset . ### Not for a non-RDF dataset
 }
 
 <RDFDistributionLevelShape> {
