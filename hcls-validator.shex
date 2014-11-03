@@ -72,9 +72,10 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     #!dct:format .,
     #!dcat:distribution .,
     ###dcat:accessURL IRI, ### is a MAY property
+    #!dcat:landingPage .,
     #!dcat:downloadURL .,
     #!void:dataDump .,
-    #!dcat:landingPage .,
+    (void:sparqlEndpoint)?,
 #Statistics
     #!void:triples .,
     #!void:entities .,
