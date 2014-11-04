@@ -147,9 +147,9 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     #!dct:format .,
     (dcat:distribution IRI)*, ###TODO restrict the shape of the IRI but could be hard to test in practice
     ###dcat:accessURL IRI, ### is a MAY property
+    ###dcat:landingPage IRI, ###MAY property
     #!dcat:downloadURL .,
     #!void:dataDump .,
-    ###dcat:landingPage IRI, ###MAY property
 #Statistics
     #!void:triples .,
     #!void:entities .,
