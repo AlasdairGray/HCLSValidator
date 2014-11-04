@@ -245,6 +245,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 ###Non-RDF distributions are validated using the DistributionShape above
 <RDFDistributionLevelShape> [
 #Core
+    (rdf:type (dctypes:Dataset))?,
     rdf:type (void:Dataset),
     rdf:type (dcat:Distribution),
     ###Free to match any other rdf:type statements
