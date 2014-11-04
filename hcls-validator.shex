@@ -299,9 +299,9 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     (dct:format IRI | dct:format xsd:string),
     #!dcat:distribution .,
     ###dcat:accessURL IRI, ### is a MAY property
+    ###dcat:landingPage IRI, ###MAY property
     (dcat:downloadURL IRI)*,
     (void:dataDump IRI)*,
-    ###dcat:landingPage IRI, ###MAY property
 #Statistics
     (void:triples xsd:integer)?,
     (void:entities xsd:integer)?,
