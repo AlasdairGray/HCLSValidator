@@ -106,7 +106,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     ###pav:authoredOn xsd:date | pav:authoredOn  xsd:dateTime | pav:authoredOn xsd:gYearMonth | pav:authoredOn xsd:gYear, ###MAY property
     ###pav:curatedOn xsd:date | pav:curatedOn  xsd:dateTime | pav:curatedOn xsd:gYearMonth | pav:curatedOn xsd:gYear, ###MAY property
     dct:creator IRI,
-    ###dct:contributor IRI | dct:contributor xsd:string, ###MAY property
+    ###dct:contributor IRI, ###MAY property
     ###pav:createdBy IRI, ###MAY property
     ###pav:authoredBy IRI, ###MAY property
     ###pav:curatedBy IRI, ###MAY property
