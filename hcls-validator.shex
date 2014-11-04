@@ -242,6 +242,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     - rdf:type - void:vocabulary - void:subset - dct:hasPart - void:uriRegexPattern - void:exampleResource - void:inDataset - dct:isVersionOf - pav:hasCurrentVersion - dct:accrualPeriodicity - dcat:distribution - void:dataDump - void:sparqlEndpoint - void:triples - void:entities - void:distinctSubjects - void:properties - void:distinctObjects - sd:namedGraph - void:propertyPartition - void:classPartition - void:subset . *
 ]
 
+###Non-RDF distributions are validated using the DistributionShape above
 <RDFDistributionLevelShape> [
 #Core
     rdf:type (void:Dataset),
