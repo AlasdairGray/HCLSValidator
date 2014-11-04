@@ -196,7 +196,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     (dct:language .)*, ###TODO define the object
     ###dcat:theme IRI*, ### Theme is a MAY property, should match something that is a skos:Concept
     ###dcat:keyword xsd:string, ### Keyword is a MAY property
-    #!void:vocabulary .,
+    #!void:vocabulary ., ###negated still since this is a non-RDF distribution
     (dct:conformsTo IRI)?,
     ###cito:citesAsAuthority IRI, ### citation is a MAY property
     #!dct:hasPart .,
