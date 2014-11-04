@@ -227,6 +227,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     ###dcat:landingPage IRI, ###MAY property
     (dcat:downloadURL IRI)*,
     #!void:dataDump .,  ### Not for a non-RDF dataset
+    #!void:sparqlEndpoint ., ### Not for a non-RDF dataset
 #Statistics
     #!void:triples .,  ### Not for a non-RDF dataset
     #!void:entities ., ### Not for a non-RDF dataset
@@ -238,7 +239,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     #!void:classPartition ., ### Not for a non-RDF dataset
     #!void:subset ., ### Not for a non-RDF dataset
     ###Following statement is used in closed shapes to negate properties
-    - rdf:type - void:vocabulary - void:subset - dct:hasPart - void:uriRegexPattern - void:exampleResource - void:inDataset - dct:isVersionOf - pav:hasCurrentVersion - dct:accrualPeriodicity - dcat:distribution - void:dataDump - void:triples - void:entities - void:distinctSubjects - void:properties - void:distinctObjects - sd:namedGraph - void:propertyPartition - void:classPartition - void:subset . *
+    - rdf:type - void:vocabulary - void:subset - dct:hasPart - void:uriRegexPattern - void:exampleResource - void:inDataset - dct:isVersionOf - pav:hasCurrentVersion - dct:accrualPeriodicity - dcat:distribution - void:dataDump - void:sparqlEndpoint - void:triples - void:entities - void:distinctSubjects - void:properties - void:distinctObjects - sd:namedGraph - void:propertyPartition - void:classPartition - void:subset . *
 ]
 
 <RDFDistributionLevelShape> [
