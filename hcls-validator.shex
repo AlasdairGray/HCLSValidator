@@ -224,9 +224,9 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     (dct:format IRI | dct:format xsd:string),
     #!dcat:distribution .,
     ###dcat:accessURL IRI, ### is a MAY property
+    ###dcat:landingPage IRI, ###MAY property
     (dcat:downloadURL IRI)*,
     #!void:dataDump .,  ### Not for a non-RDF dataset
-    ###dcat:landingPage IRI, ###MAY property
 #Statistics
     #!void:triples .,  ### Not for a non-RDF dataset
     #!void:entities ., ### Not for a non-RDF dataset
