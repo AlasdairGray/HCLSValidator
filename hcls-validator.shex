@@ -150,6 +150,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     ###dcat:landingPage IRI, ###MAY property
     #!dcat:downloadURL .,
     #!void:dataDump .,
+    #!void:sparqlEndpoint .,
 #Statistics
     #!void:triples .,
     #!void:entities .,
@@ -161,7 +162,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     #!void:classPartition .,
     #!void:subset .
     ###Following statement is used in closed shapes to negate properties
-    - rdf:type - void:vocabulary - void:subset - idot:identifierPattern - void:uriRegexPattern - idot:exampleIdentifier - void:exampleResource - void:inDataset - pav:hasCurrentVersion - pav:createdWith - dct:accrualPeriodicity - dct:format - dcat:downloadURL - void:dataDump - void:triples - void:entities - void:distinctSubjects - void:properties - void:distinctObjects - sd:namedGraph - void:propertyPartition - void:classPartition - void:subset . *
+    - rdf:type - void:vocabulary - void:subset - idot:identifierPattern - void:uriRegexPattern - idot:exampleIdentifier - void:exampleResource - void:inDataset - pav:hasCurrentVersion - pav:createdWith - dct:accrualPeriodicity - dct:format - dcat:downloadURL - void:dataDump - void:sparqlEndpoint - void:triples - void:entities - void:distinctSubjects - void:properties - void:distinctObjects - sd:namedGraph - void:propertyPartition - void:classPartition - void:subset . *
 ]
 
 <DistributionLevelShape> [
