@@ -168,6 +168,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 ###RDF distributions are being validated separately in the RDFDistributionShape below
 <DistributionLevelShape> [
 #Core
+    (rdf:type (dctypes:Dataset))?,
     ###This is a non-RDF dataset so cannot be typed as void:Dataset
     #!rdf:type (void:Dataset),
     ###Following statement used to disallow void:Dataset and dcat:Distribution
