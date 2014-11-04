@@ -302,6 +302,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     ###dcat:landingPage IRI, ###MAY property
     (dcat:downloadURL IRI)*,
     (void:dataDump IRI)*,
+    ###TODO add void:sparqlEndpoint depending on resolution of issue #13
 #Statistics
     (void:triples xsd:integer)?,
     (void:entities xsd:integer)?,
