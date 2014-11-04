@@ -247,7 +247,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 #Core
     (rdf:type (dctypes:Dataset))?,
     rdf:type (void:Dataset),
-    rdf:type (dcat:Distribution),
+    (rdf:type (dcat:Distribution))?,
     ###Free to match any other rdf:type statements
     dct:title (@en),  ### should be rdf:langString
     ###dct:alternative rdf:langString, is a MAY property
