@@ -165,9 +165,10 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     - rdf:type - void:vocabulary - void:subset - idot:identifierPattern - void:uriRegexPattern - idot:exampleIdentifier - void:exampleResource - void:inDataset - pav:hasCurrentVersion - pav:createdWith - dct:accrualPeriodicity - dct:format - dcat:downloadURL - void:dataDump - void:sparqlEndpoint - void:triples - void:entities - void:distinctSubjects - void:properties - void:distinctObjects - sd:namedGraph - void:propertyPartition - void:classPartition - void:subset . *
 ]
 
+###RDF distributions are being validated separately in the RDFDistributionShape below
 <DistributionLevelShape> [
 #Core
-    ###RDF distributions are being validated separately
+    ###This is a non-RDF dataset so cannot be typed as void:Dataset
     #!rdf:type (void:Dataset),
     ###Following statement used to disallow void:Dataset and dcat:Distribution
     rdf:type (- void:Dataset)*,
