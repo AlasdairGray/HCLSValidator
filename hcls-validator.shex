@@ -22,20 +22,20 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     rdf:type (dctypes:Dataset),
     !rdf:type (void:Dataset),
     !rdf:type (dcat:Distribution),
-    dct:title (@en),  ### should be rdf:langString
+    dct:title rdf:langString,
     ###dct:alternative rdf:langString, is a MAY property
-    dct:description (@en), ### should be rdf:langString
+    dct:description rdf:langString,
+    !dct:creator .,
+    !pav:createBy .,
+    !dct:contributor .,
+    !pav:authoredBy .,
+    !pav:curatedBy .,
     !dct:created .,
     !pav:createdOn .,
     !pav:authoredOn .,
     !pav:curatedOn .,
-    !dct:creator .,
-    !dct:contributor .,
-    !pav:createdBy .,
-    !pav:authoredBy .,
-    !pav:curatedBy .,
-    !dct:issued .,
     dct:publisher IRI,
+    !dct:issued .,
     (foaf:page IRI)?,
     (schemaorg:logo IRI)?,
     (dct:license IRI)* , ### License is now a MAY property
@@ -45,7 +45,9 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     ###dcat:keyword xsd:string, ### Keyword is a MAY property
     !void:vocabulary .,
     !dct:conformsTo .,
+    ###dct:references IRI, ###MAY property
     ###cito:citesAsAuthority IRI, ### citation is a MAY property
+    ###rdfs:seeAlso IRI, ###MAY property
     ###dct:hasPart IRI, ###part is a MAY property, what should be the shape of the description it matches?
     !void:subset .,
 #Identifiers
@@ -53,11 +55,12 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     ###idot:alternatePrefix xsd:string, ### Alternate prefix is a MAY property
     !idot:identifierPattern .,
     !void:uriRegexPattern .,
-    ###idot:accessPattern xsd:string, ### Access pattern is a MAY property
+    !idot:accessPattern ., ### Access pattern is a MAY property
     !idot:exampleIdentifier .,
     !void:exampleResource .,
 #Provenance and Change
     !void:inDataset .,
+    !sio:has-data-item .,
     !pav:version .,
     !dct:isVersionOf .,
     !pav:previousVersion .,
@@ -66,24 +69,23 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     !pav:retrievedFrom .,
     !prov:wasDerivedFrom .,
     !pav:createdWith .,
-###Accrual Periodicity should match something from the freq namespace
-    dct:accrualPeriodicity . ,  ###TODO dct:accrualPeriodicity freq:~?,
+    dct:accrualPeriodicity freq:~?, ###TODO Check freq:~ is the correct syntax
 #Availability/Distributions
-    !dct:format .,
     !dcat:distribution .,
+    !dcat:landingPage .,
+    !dct:format .,
     ###dcat:accessURL IRI, ### is a MAY property
     !dcat:downloadURL .,
     !void:dataDump .,
-    !dcat:landingPage .,
+    (void:sparqlEndpoint IRI)?
 #Statistics
     !void:triples .,
     !void:entities .,
     !void:distinctSubjects .,
     !void:properties .,
     !void:distinctObjects .,
-    !sd:namedGraph .,
-    !void:propertyPartition .,
     !void:classPartition .,
+    !void:propertyPartition .,
     !void:subset .
 }
 
