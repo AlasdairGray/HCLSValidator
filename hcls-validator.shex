@@ -94,31 +94,30 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     rdf:type (dctypes:Dataset),
     !rdf:type (void:Dataset),
     !rdf:type (dcat:Distribution),
-    dct:title (@en),  ### should be rdf:langString
+    dct:title rdf:langString,
     ###dct:alternative rdf:langString, is a MAY property
-    dct:description (@en), ### should be rdf:langString
+    dct:description rdf:langString,
+    (dct:creator IRI | pav:createdBy IRI)+,
+    ###(dct:contributor IRI | pav:authoredBy IRI | pav:curatedBy IRI)+, MAY property
     ###TODO add test that one of created or issued is present
-    (dct:created xsd:date | dct:created  xsd:dateTime | dct:created xsd:gYearMonth | dct:created xsd:gYear)?,
+    (dct:created xsd:date | dct:created  xsd:dateTime | dct:created xsd:gYearMonth | dct:created xsd:gYear | pav:createdOn xsd:dateTime)?,
     ###pav:createdOn xsd:date | pav:createdOn  xsd:dateTime | pav:createdOn xsd:gYearMonth | pav:createdOn xsd:gYear, ###MAY property
     ###pav:authoredOn xsd:date | pav:authoredOn  xsd:dateTime | pav:authoredOn xsd:gYearMonth | pav:authoredOn xsd:gYear, ###MAY property
     ###pav:curatedOn xsd:date | pav:curatedOn  xsd:dateTime | pav:curatedOn xsd:gYearMonth | pav:curatedOn xsd:gYear, ###MAY property
-    dct:creator IRI | dct:creator xsd:string,
-    ###dct:contributor IRI | dct:contributor xsd:string, ###MAY property
-    ###pav:createdBy IRI, ###MAY property
-    ###pav:authoredBy IRI, ###MAY property
-    ###pav:curatedBy IRI, ###MAY property
-    (dct:issued xsd:date | dct:issued xsd:dateTime | dct:issued xsd:gYearMonth | dct:issued xsd:gYear)?,
     dct:publisher IRI,
+    (dct:issued xsd:date | dct:issued xsd:dateTime | dct:issued xsd:gYearMonth | dct:issued xsd:gYear)?,
     (foaf:page IRI)?,
     (schemaorg:logo IRI)?,
-    (dct:license IRI)+ , ### License is MUST property, but multiple allowed
+    (dct:license IRI)+ , ### License is SHOULD property, but multiple allowed
     ###dct:rights rdf:langString, ### Rights is a MAY property
     (dct:language .)*, ###TODO define the object
     ###dcat:theme IRI*, ### Theme is a MAY property, should match something that is a skos:Concept
     ###dcat:keyword xsd:string, ### Keyword is a MAY property
     !void:vocabulary .,
     ###dct:conformsTo IRI, ###MAY property
+    ###dct:references IRI, ###MAY property
     ###cito:citesAsAuthority IRI, ### citation is a MAY property
+    ###rdfs:seeAlso IRI, ###MAY property
     ###dct:hasPart IRI, ###part is a MAY property, what should be the shape of the description it matches?
     !void:subset .,
 #Identifiers
@@ -126,36 +125,34 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     ###idot:alternatePrefix xsd:string, ### Alternate prefix is a MAY property
     !idot:identifierPattern .,
     !void:uriRegexPattern .,
-    ###idot:accessPattern xsd:string, ### Access pattern is a MAY property
+    !idot:accessPattern .,
     !idot:exampleIdentifier .,
     !void:exampleResource .,
 #Provenance and Change
+    !sio:has-data-item .,
     !void:inDataset .,
     pav:version xsd:string,
     dct:isVersionOf IRI,
     (pav:previousVersion IRI)?,
     !pav:hasCurrentVersion .,
-    (dct:source IRI)+,
-    (pav:retrievedFrom IRI)+,
-    (prov:wasDerivedFrom IRI)+,
-    !pav:createdWith .,
+    (dct:source IRI | pav:retrievedFrom IRI | prov:wasDerivedFrom IRI | pav:createdWith .)+,
     !dct:accrualPeriodicity . ,
 #Availability/Distributions
-    !dct:format .,
     (dcat:distribution IRI)*, ###TODO restrict the shape of the IRI but could be hard to test in practice
+    ###dcat:landingPage IRI, ###MAY property
+    !dct:format .,
     ###dcat:accessURL IRI, ### is a MAY property
     !dcat:downloadURL .,
     !void:dataDump .,
-    ###dcat:landingPage IRI, ###MAY property
+    !void:sparqlEndpoint ., ###SHOULD NOT being strict here
 #Statistics
     !void:triples .,
     !void:entities .,
     !void:distinctSubjects .,
     !void:properties .,
     !void:distinctObjects .,
-    !sd:namedGraph .,
-    !void:propertyPartition .,
     !void:classPartition .,
+    !void:propertyPartition .,
     !void:subset .
 }
 
