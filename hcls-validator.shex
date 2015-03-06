@@ -69,7 +69,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     !pav:retrievedFrom .,
     !prov:wasDerivedFrom .,
     !pav:createdWith .,
-    dct:accrualPeriodicity freq:~?, ###TODO Check freq:~ is the correct syntax
+    dct:accrualPeriodicity IRI?,###freq:~?, ###TODO Check freq:~ is the correct syntax
 #Availability/Distributions
     !dcat:distribution .,
     !dcat:landingPage .,
