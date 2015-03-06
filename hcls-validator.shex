@@ -77,7 +77,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     ###dcat:accessURL IRI, ### is a MAY property
     !dcat:downloadURL .,
     !void:dataDump .,
-    (void:sparqlEndpoint IRI)?
+    (void:sparqlEndpoint IRI)?,
 #Statistics
     !void:triples .,
     !void:entities .,
