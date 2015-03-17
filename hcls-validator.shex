@@ -98,12 +98,14 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     ###dct:alternative rdf:langString, is a MAY property
     dct:description rdf:langString,
     (dct:creator IRI | pav:createdBy IRI)+,
-    ###(dct:contributor IRI | pav:authoredBy IRI | pav:curatedBy IRI)+, MAY property
+    ###(dct:contributor IRI)*, ###MAY property
+    ###(pav:authoredBy IRI)*, ###MAY property
+    ###(pav:curatedBy IRI)*, ###MAY property
     ###TODO add test that one of created or issued is present
     (dct:created xsd:date | dct:created  xsd:dateTime | dct:created xsd:gYearMonth | dct:created xsd:gYear | pav:createdOn xsd:dateTime)?,
-    ###pav:createdOn xsd:date | pav:createdOn  xsd:dateTime | pav:createdOn xsd:gYearMonth | pav:createdOn xsd:gYear, ###MAY property
-    ###pav:authoredOn xsd:date | pav:authoredOn  xsd:dateTime | pav:authoredOn xsd:gYearMonth | pav:authoredOn xsd:gYear, ###MAY property
-    ###pav:curatedOn xsd:date | pav:curatedOn  xsd:dateTime | pav:curatedOn xsd:gYearMonth | pav:curatedOn xsd:gYear, ###MAY property
+    ###(pav:createdOn xsd:date | pav:createdOn  xsd:dateTime | pav:createdOn xsd:gYearMonth | pav:createdOn xsd:gYear), ###MAY property
+    ###(pav:authoredOn xsd:date | pav:authoredOn  xsd:dateTime | pav:authoredOn xsd:gYearMonth | pav:authoredOn xsd:gYear), ###MAY property
+    ###(pav:curatedOn xsd:date | pav:curatedOn  xsd:dateTime | pav:curatedOn xsd:gYearMonth | pav:curatedOn xsd:gYear), ###MAY property
     dct:publisher IRI,
     (dct:issued xsd:date | dct:issued xsd:dateTime | dct:issued xsd:gYearMonth | dct:issued xsd:gYear)?,
     (foaf:page IRI)?,
@@ -135,7 +137,10 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     dct:isVersionOf IRI,
     (pav:previousVersion IRI)?,
     !pav:hasCurrentVersion .,
-    (dct:source IRI | pav:retrievedFrom IRI | prov:wasDerivedFrom IRI | pav:createdWith .)+,
+    (dct:source IRI)*,
+    (pav:retrievedFrom IRI)?,
+    (prov:wasDerivedFrom IRI)*,
+    (pav:createdWith IRI)?,
     !dct:accrualPeriodicity . ,
 #Availability/Distributions
     (dcat:distribution IRI)*, ###TODO restrict the shape of the IRI but could be hard to test in practice
@@ -166,7 +171,9 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     ###dct:alternative rdf:langString, is a MAY property
     dct:description rdf:langString,
     (dct:creator IRI | pav:createdBy IRI)+,
-    ###(dct:contributor IRI | pav:authoredBy IRI | pav:curatedBy IRI)+, MAY property
+    ###(dct:contributor IRI)*,
+    ###(pav:authoredBy IRI)*,
+    ###(pav:curatedBy IRI)*, MAY property
     ###TODO add test that one of created or issued is present
     (dct:created xsd:date | dct:created  xsd:dateTime | dct:created xsd:gYearMonth | dct:created xsd:gYear | pav:createdOn xsd:dateTime)?,
     ###pav:createdOn xsd:date | pav:createdOn  xsd:dateTime | pav:createdOn xsd:gYearMonth | pav:createdOn xsd:gYear, ###MAY property
@@ -203,7 +210,10 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     !dct:isVersionOf .,
     (pav:previousVersion IRI)?,
     !pav:hasCurrentVersion .,
-    (dct:source IRI | pav:retrievedFrom IRI | prov:wasDerivedFrom IRI | pav:createdWith IRI)*,
+    (dct:source IRI)*,
+    (pav:retrievedFrom IRI)?,
+    (prov:wasDerivedFrom IRI)*,
+    (pav:createdWith IRI)*,
     !dct:accrualPeriodicity . ,
 #Availability/Distributions
     !dcat:distribution .,
@@ -233,7 +243,9 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     ###dct:alternative rdf:langString, is a MAY property
     dct:description rdf:langString,
     (dct:creator IRI | pav:createdBy IRI)+,
-    ###(dct:contributor IRI | pav:authoredBy IRI | pav:curatedBy IRI)+, MAY property
+    ###(dct:contributor IRI)*,
+    ###(pav:authoredBy IRI)*,
+    ###(pav:curatedBy IRI)*, MAY property
     ###TODO add test that one of created or issued is present
     (dct:created xsd:date | dct:created  xsd:dateTime | dct:created xsd:gYearMonth | dct:created xsd:gYear | pav:createdOn xsd:dateTime)?,
     ###pav:createdOn xsd:date | pav:createdOn  xsd:dateTime | pav:createdOn xsd:gYearMonth | pav:createdOn xsd:gYear, ###MAY property
@@ -269,7 +281,10 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     !dct:isVersionOf .,
     (pav:previousVersion IRI)?,
     !pav:hasCurrentVersion .,
-    (dct:source IRI | pav:retrievedFrom IRI | prov:wasDerivedFrom IRI | pav:createdWith IRI)*,
+    (dct:source IRI)*,
+    (pav:retrievedFrom IRI)?,
+    (prov:wasDerivedFrom IRI)*,
+    (pav:createdWith IRI)?,
     !dct:accrualPeriodicity . ,
 #Availability/Distributions
     !dcat:distribution .,
